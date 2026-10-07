@@ -1,0 +1,112 @@
+/* modules/regioes/style.css */
+
+/* A área central vira coluna flex: o módulo ocupa a altura toda (antes o mapa não tinha altura definida) */
+.ct-body.mod-regioes{display:flex;flex-direction:column;overflow:auto}
+.rg{flex:none;height:calc(100vh - 110px);height:calc(100dvh - 110px);min-height:480px;display:grid;grid-template-columns:minmax(0,1fr) 300px;grid-template-rows:minmax(0,1fr);gap:16px}
+
+.rg-mapa,.rg-lado{display:flex;flex-direction:column;min-height:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+.rg-mapa{padding:14px 16px 12px}
+.rg-lado{padding:16px}
+
+/* barra: voltar + nome sob o cursor */
+.rg-bar{flex:none;display:flex;align-items:center;gap:12px;min-height:34px;padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid var(--border)}
+#rg-dica{font-size:14px;font-weight:500;color:var(--text-2)}
+
+/* mapa: o SVG preenche o palco (position absolute = altura sempre resolvida) */
+.rg-stage{position:relative;flex:1;min-height:0;background:#EEF4F4;border-radius:var(--radius)}
+#rg-svg{position:absolute;inset:8px;width:calc(100% - 16px);height:calc(100% - 16px);touch-action:none;user-select:none;cursor:grab}
+#rg-svg.arrastando,#rg-svg.arrastando path{cursor:grabbing}
+#rg-svg path{fill:#C9DAD8;stroke:#fff;stroke-width:.7;stroke-linejoin:round;vector-effect:non-scaling-stroke;cursor:pointer;transition:fill .12s}
+#rg-svg path:hover{fill:#8FC2BD}
+#rg-svg path.sel{fill:#E3732D;stroke:#B85A1F}
+#rg-svg path.reg{fill:var(--teal);stroke:var(--teal-dark);cursor:not-allowed}
+#rg-svg path.sel:hover{fill:#CF6523}
+#rg-svg path.off{fill:#B5D9D6;stroke:var(--teal-dark);stroke-dasharray:3 2}
+
+/* rótulos das cidades (entram/saem conforme o zoom; nunca capturam o mouse) */
+.rg-rots{pointer-events:none;user-select:none}
+.rg-rot{font-family:inherit;font-weight:500;fill:var(--text-1);stroke:#fff;stroke-linejoin:round;paint-order:stroke}
+.rg-rot.cap{font-weight:600}
+.rg-rot.uf{font-weight:700;fill:var(--text-2)}
+.rg-rot.sel{fill:#fff;stroke:#B85A1F;font-weight:600}
+.rg-rot.off{fill:var(--text-2);font-weight:600}
+.rg-rot.reg{fill:#fff;stroke:var(--teal-dark);font-weight:600}
+
+/* botões de zoom */
+.rg-zoom{position:absolute;top:10px;right:10px;z-index:1;display:flex;flex-direction:column;gap:6px}
+.rg-zoom button{width:34px;height:34px;display:grid;place-items:center;font-size:17px;color:var(--text-1);background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 1px 3px rgba(0,0,0,.08);cursor:pointer;transition:background .12s}
+.rg-zoom button:hover{background:var(--teal-soft);color:var(--teal-dark)}
+
+/* legenda */
+.rg-leg{position:absolute;left:10px;bottom:10px;z-index:1;display:flex;flex-wrap:wrap;gap:4px 14px;margin:0;padding:6px 10px;list-style:none;font-size:12px;color:var(--text-2);background:rgba(255,255,255,.94);border:1px solid var(--border);border-radius:var(--radius)}
+.rg-leg li{display:inline-flex;align-items:center;gap:6px}
+.rg-leg .k{width:12px;height:12px;border-radius:3px;border:1px solid transparent}
+.k.livre{background:#C9DAD8;border-color:#A9C1BE}
+.k.sel{background:#E3732D;border-color:#B85A1F}
+.k.reg{background:var(--teal);border-color:var(--teal-dark)}
+.k.off{background:#B5D9D6;border-color:var(--teal-dark);border-style:dashed}
+
+/* lateral: abas (uma lista por vez, ocupando toda a altura) + rodapé fixo */
+.rg-lado{padding:12px}
+.rg-abas{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:3px;margin-bottom:10px;background:var(--bg);border-radius:var(--radius)}
+.rg-abas button{display:flex;align-items:center;justify-content:center;gap:6px;height:32px;font:inherit;font-size:13px;font-weight:500;color:var(--text-2);background:none;border:none;border-radius:calc(var(--radius) - 2px);cursor:pointer;white-space:nowrap}
+.rg-abas button[aria-selected="true"]{color:var(--teal-dark);background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.rg-abas b{min-width:20px;padding:1px 6px;font-size:11px;font-weight:600;color:var(--teal-dark);background:var(--teal-soft);border-radius:10px}
+.rg-painel{flex:1;min-height:0;display:flex;flex-direction:column}
+.rg-painel[hidden]{display:none}
+.rg-limpar{flex:none;align-self:flex-end;margin:0 2px 6px;padding:2px 4px;font:inherit;font-size:12px;color:var(--text-3);background:none;border:none;cursor:pointer;text-decoration:underline}
+.rg-limpar:hover{color:var(--teal-dark)}
+.rg-limpar[hidden]{display:none}
+.rg-cap{flex:none;margin:0 2px 6px;font-size:12px;color:var(--text-3)}
+#rg-sel,#rg-cad{flex:1;min-height:0;overflow:auto;list-style:none;margin:0;border:1px solid var(--border);border-radius:var(--radius)}
+#rg-sel li:last-child{border-bottom:none}
+#rg-cad li{display:flex;align-items:center;border-bottom:1px solid var(--border)}
+#rg-cad li:last-child{border-bottom:none}
+#rg-cad .rg-it{flex:1;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 10px;text-align:left;font:inherit;font-size:13px;color:var(--text-1);background:none;border:none;cursor:pointer}
+#rg-cad .rg-it:hover:not(:disabled){background:var(--teal-soft)}
+#rg-cad .rg-it:disabled{cursor:default;color:var(--text-2)}
+#rg-cad .rg-it span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#rg-cad .rg-it small{flex:none;font-size:11px;color:var(--text-3)}
+#rg-cad li.off .rg-it span{color:var(--text-3)}
+#rg-cad .rg-ac{flex:none;width:28px;height:28px;margin-right:2px;display:grid;place-items:center;font-size:15px;color:var(--text-3);background:none;border:none;border-radius:6px;cursor:pointer}
+#rg-cad .rg-ac:hover{background:var(--teal-soft);color:var(--teal-dark)}
+#rg-cad li.conf{gap:6px;padding:6px 8px;font-size:13px;background:var(--teal-soft)}
+#rg-cad li.conf span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#rg-cad .rg-sim,#rg-cad .rg-nao{flex:none;height:26px;padding:0 10px;font:inherit;font-size:12px;border-radius:6px;cursor:pointer}
+#rg-cad .rg-sim{font-weight:600;color:#fff;background:var(--teal-dark);border:none;transition:background .12s}
+#rg-cad .rg-sim:hover{background:var(--teal)}
+#rg-cad .rg-nao{color:var(--text-2);background:#fff;border:1px solid var(--border)}
+#rg-sel:empty,#rg-cad:empty{display:flex;align-items:center;justify-content:center;padding:0 12px;text-align:center;border:1.5px dashed var(--border);border-radius:var(--radius)}
+#rg-sel:empty::before{content:"Clique nas cidades do mapa para adicioná-las aqui.";font-size:12px;line-height:1.5;color:var(--text-3)}
+#rg-cad:empty::before{content:"Nenhuma cidade cadastrada aqui.";font-size:12px;line-height:1.5;color:var(--text-3)}
+.rg-rodape{flex:none;display:flex;flex-direction:column;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+#rg-sel li span{cursor:pointer}
+#rg-sel li{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 2px 2px 10px;border-bottom:1px solid var(--border);font-size:13px}
+#rg-sel li span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#rg-sel .btn-ico{width:28px;height:28px;font-size:15px;color:var(--text-3)}
+#rg-sel .btn-ico:hover{background:var(--teal-soft);color:var(--teal-dark)}
+.rg-salvar{height:40px;font-weight:600;color:#fff;background:var(--teal-dark);border:none;border-radius:var(--radius);cursor:pointer;transition:background .12s}
+.rg-salvar:hover:not(:disabled){background:var(--teal)}
+.rg-salvar:disabled{opacity:.4;cursor:not-allowed}
+#rg-msg{min-height:18px;margin-top:6px;font-size:12px;line-height:1.4;color:var(--text-2)}
+
+/* lateral: cidades já cadastradas (por estado, ou no estado aberto) */
+
+/* filtros (painel da esquerda) */
+.rg-lbl{display:block;margin:0 0 4px;font-size:12px;font-weight:500;color:var(--text-2)}
+.rg-campo{width:100%;height:36px;margin-bottom:14px;padding:0 10px;font:inherit;color:var(--text-1);background:#fff;border:1.5px solid var(--border);border-radius:var(--radius)}
+.rg-campo:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(47,156,149,.18)}
+.rg-campo:disabled{background:var(--bg);color:var(--text-3)}
+.rg-res{list-style:none}
+.rg-res button{width:100%;padding:7px 8px;text-align:left;font:inherit;color:var(--text-1);border:none;background:none;border-radius:6px;cursor:pointer}
+.rg-res button:hover{background:var(--teal-soft)}
+.rg-res button.sel{background:rgba(227,115,45,.15)}
+.rg-res button.reg{color:var(--text-3);cursor:not-allowed}
+
+/* celular: mapa em cima, lista embaixo */
+@media (max-width:900px){
+  .rg{flex:none;height:auto;min-height:0;grid-template-columns:minmax(0,1fr);grid-template-rows:none}
+  .rg-stage{flex:none;height:56vh}
+    .rg-painel{flex:none}
+  #rg-sel,#rg-cad{flex:none;max-height:40vh}
+}

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Servilar.co — Acesso administrativo</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css"/>
+
+
+
+<style>
+:root{
+  --teal:#2F9C95; --teal-dark:#1F746F; --teal-soft:#E6F3F2;
+  --orange:#E3732D; --orange-dark:#C85F1D;
+  --bg:#F4F4F4; --surface:#FFFFFF; --surface-2:#F4F4F4;
+  --border:#E3E7E7; --border-mid:#CBD3D2; --border-dark:#9AA7A6;
+  --text-1:#14302E; --text-2:#46605E; --text-3:#7C8F8D;
+  --danger:#C0392B; --success:#1F7A45;
+  --font-title:'Montserrat',system-ui,sans-serif;
+  --font:'Poppins',system-ui,sans-serif;
+  --radius:10px; --radius-lg:14px; --t:.16s ease;
+  --brand-w:520px; --pad-x:64px; --input-h:46px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%;font-size:16px}
+body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text-1);-webkit-font-smoothing:antialiased}
+
+.page{height:100vh;min-height:100dvh;display:flex}
+
+/* ── Painel da marca ── */
+.brand-panel{
+  width:var(--brand-w);flex-shrink:0;background:var(--teal);color:#fff;
+  display:flex;flex-direction:column;justify-content:space-between;
+  padding:56px 56px 44px;position:relative;overflow:hidden;
+}
+.brand-top,.brand-footer{position:relative;z-index:1}
+.brand-logo{height:34px;width:auto;display:block;margin-bottom:84px}
+.brand-headline{
+  font-family:var(--font-title);font-weight:700;font-size:40px;line-height:1.18;
+  letter-spacing:-.02em;margin-bottom:20px;max-width:15ch;
+}
+.brand-desc{font-size:16px;font-weight:300;line-height:1.65;color:rgba(255,255,255,.88);max-width:36ch}
+.brand-footer{font-size:12px;color:rgba(255,255,255,.7)}
+.brand-footer i{color:#fff;margin-right:6px;vertical-align:-1px}
+
+/* ── Painel do formulário ── */
+.form-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--surface);min-width:0}
+.form-header{padding:28px var(--pad-x) 0;border-bottom:1px solid var(--border);flex-shrink:0}
+.form-header-logo{height:32px;width:auto}
+.badge{
+  display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;
+  color:var(--teal-dark);background:var(--teal-soft);padding:5px 12px;border-radius:99px;
+}
+.tabs{display:flex}
+.tab-btn{
+  display:flex;align-items:center;gap:8px;height:46px;padding:0 20px;font-family:var(--font);
+  font-size:14px;font-weight:500;color:var(--text-3);background:transparent;border:none;
+  border-bottom:3px solid transparent;margin-bottom:-1px;cursor:pointer;
+  transition:color var(--t),border-color var(--t);touch-action:manipulation;white-space:nowrap;
+}
+.tab-btn i{font-size:17px}
+.tab-btn:hover{color:var(--text-2)}
+.tab-btn.active{color:var(--teal-dark);border-bottom-color:var(--orange)}
+.tab-btn:focus-visible,.btn-sub:focus-visible,.salvar-wrap:focus-visible{outline:3px solid rgba(47,156,149,.4);outline-offset:2px}
+
+.form-body{flex:1;overflow-y:auto;padding:48px var(--pad-x) 56px;overscroll-behavior:contain}
+.form-inner{max-width:440px}
+.panel{display:none}
+.panel.active{display:block}
+.panel-title{font-family:var(--font-title);font-size:26px;font-weight:700;letter-spacing:-.02em;margin-bottom:8px}
+.panel-sub{font-size:14px;color:var(--text-2);line-height:1.65;margin-bottom:30px}
+
+/* ── Campos ── */
+.fields{display:flex;flex-direction:column;gap:16px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+label{font-size:13px;font-weight:500;color:var(--text-2)}
+label .req{color:var(--orange)}
+.iw{position:relative;display:flex;align-items:center}
+.ii{position:absolute;left:14px;font-size:18px;color:var(--border-dark);pointer-events:none;transition:color var(--t)}
+input{
+  width:100%;height:var(--input-h);padding:0 14px 0 42px;font-family:var(--font);font-size:15px;
+  color:var(--text-1);background:var(--surface-2);border:1.5px solid var(--border);
+  border-radius:var(--radius);outline:none;transition:border-color var(--t),box-shadow var(--t),background var(--t);
+}
+input::placeholder{color:var(--border-dark)}
+input:hover{border-color:var(--border-mid);background:#fff}
+input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 4px rgba(47,156,149,.14)}
+.iw:focus-within .ii{color:var(--teal)}
+.fe{font-size:12px;color:var(--danger);display:none}
+.field.err input{border-color:var(--danger);background:#FDF2F1}
+.field.err .fe{display:block}
+.field.err .ii{color:var(--danger)}
+
+/* ── Alertas ── */
+.alert{display:none;align-items:flex-start;gap:10px;padding:13px 16px;border-radius:var(--radius);font-size:13.5px;line-height:1.5;margin-bottom:24px}
+.alert.vis{display:flex}
+.alert i{font-size:18px;flex-shrink:0;margin-top:1px}
+.alert-err{background:#FDF2F1;border:1.5px solid #EFC4C0;color:var(--danger)}
+.alert-ok{background:#EEF8F2;border:1.5px solid #A8DFB8;color:var(--success)}
+
+/* ── Salvar acesso ── */
+.salvar-wrap{display:inline-flex;align-items:center;gap:10px;margin-top:18px;cursor:pointer;user-select:none;border-radius:6px}
+.salvar-check{
+  width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border-mid);background:var(--surface-2);
+  display:flex;align-items:center;justify-content:center;transition:background var(--t),border-color var(--t);
+}
+.salvar-check i{font-size:12px;color:#fff;opacity:0;transition:opacity .12s}
+.salvar-check.on{background:var(--teal);border-color:var(--teal)}
+.salvar-check.on i{opacity:1}
+.salvar-wrap span{font-size:13px;color:var(--text-2)}
+
+/* ── Botão ── */
+.btn-sub{
+  display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:50px;margin-top:28px;
+  font-family:var(--font);font-size:15px;font-weight:600;color:#fff;background:var(--teal-dark);
+  border:none;border-radius:var(--radius);cursor:pointer;transition:background var(--t),transform var(--t);
+  touch-action:manipulation;
+}
+.btn-sub i{font-size:18px}
+.btn-sub:hover{background:#185D59}
+.btn-sub:active{transform:scale(.985)}
+.btn-sub:disabled{opacity:.45;cursor:not-allowed;pointer-events:none}
+.spin{animation:spin .75s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Banner mobile ── */
+.mobile-banner{display:none;background:var(--teal);padding:22px 20px}
+.mobile-banner img{height:26px;width:auto;display:block}
+.mobile-banner p{margin-top:8px;font-size:13px;color:rgba(255,255,255,.88)}
+
+/* ── Responsivo ── */
+@media (max-width:1100px){:root{--brand-w:400px;--pad-x:44px}.brand-headline{font-size:34px}}
+@media (max-width:900px){
+  .brand-panel{display:none}
+  :root{--pad-x:32px}
+  .form-panel{background:var(--bg)}
+  .form-header,.form-body{background:var(--surface)}
+  .form-body{padding-top:36px}
+}
+@media (max-width:480px){
+  :root{--pad-x:20px;--input-h:48px}
+  body{background:var(--teal)}
+  .page{flex-direction:column}
+  .mobile-banner{display:block}
+  .form-panel{border-radius:18px 18px 0 0;overflow:visible}
+  .form-header{border-radius:18px 18px 0 0;padding-top:20px;position:sticky;top:0;z-index:10}
+  .form-header-logo{display:none}
+  .tab-btn{flex:1;justify-content:center;padding:0 10px;font-size:13px}
+  .form-body{overflow-y:auto;padding:28px var(--pad-x) calc(env(safe-area-inset-bottom) + 40px)}
+  .panel-title{font-size:22px}
+  input{font-size:16px}
+  .row{grid-template-columns:1fr}
+  .btn-sub{height:54px;font-size:16px}
+}
+@media (prefers-reduced-motion:reduce){.spin{animation-duration:1.6s}}
+
+/* ── Código de verificação ── */
+#codigo{letter-spacing:.35em;font-weight:600;text-align:center;padding-left:42px}
+.codigo-links{display:flex;justify-content:space-between;margin-top:18px}
+.link-btn{background:none;border:none;font:inherit;font-size:13px;font-weight:500;color:var(--teal-dark);cursor:pointer;padding:4px 0}
+.link-btn:disabled{color:var(--text-3);cursor:default}
+.link-btn:focus-visible{outline:3px solid rgba(47,156,149,.4);outline-offset:2px;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Banner mobile -->
+  <div class="mobile-banner" aria-hidden="true">
+    <img src="assets/logo-servilar-branco.png" alt="">
+    <p>Painel administrativo</p>
+  </div>
+
+  <!-- Painel da marca -->
+  <aside class="brand-panel" aria-hidden="true">
+    <div class="brand-top">
+      <img src="assets/logo-servilar-branco.png" alt="Servilar.co" class="brand-logo">
+      <h1 class="brand-headline">Serviços certos, nas regiões certas.</h1>
+      <p class="brand-desc">Cadastre serviços, defina regiões de atendimento e acompanhe a ponte entre clientes e profissionais.</p>
+    </div>
+    <p class="brand-footer"><i class="ph ph-lock-key"></i>Acesso restrito a administradores</p>
+  </aside>
+
+  <!-- Painel do formulário -->
+  <main class="form-panel">
+    <div class="form-header">
+
+      <nav class="tabs" role="tablist">
+        <button class="tab-btn active" id="tab-login" role="tab" aria-selected="true" aria-controls="panel-login" onclick="switchTab('login')">
+          <i class="ph ph-sign-in"></i> Entrar
+        </button>
+        <button class="tab-btn" id="tab-cadastro" role="tab" aria-selected="false" aria-controls="panel-cadastro" onclick="switchTab('cadastro')">
+          <i class="ph ph-user-plus"></i> Novo administrador
+        </button>
+      </nav>
+    </div>
+
+    <div class="form-body">
+      <div class="form-inner">
+
+        <!-- LOGIN -->
+        <div class="panel active" id="panel-login" role="tabpanel" aria-labelledby="tab-login">
+          <h2 class="panel-title">Bem-vindo de volta</h2>
+          <p class="panel-sub">Informe seu CPF para acessar o painel administrativo.</p>
+
+          <div class="alert alert-err" id="login-alert" role="alert">
+            <i class="ph-fill ph-warning-circle"></i><span>CPF não autorizado.</span>
+          </div>
+
+          <div class="fields">
+            <div class="field" id="f-login-cpf">
+              <label for="login-cpf">CPF</label>
+              <div class="iw">
+                <i class="ph ph-identification-card ii"></i>
+                <input type="text" id="login-cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off">
+              </div>
+              <span class="fe">Informe um CPF válido.</span>
+            </div>
+          </div>
+
+          <div class="salvar-wrap" role="checkbox" tabindex="0" aria-checked="false" id="salvar-wrap" onclick="toggleSalvar()">
+            <div class="salvar-check" id="salvar-box"><i class="ph ph-check"></i></div>
+            <span>Lembrar CPF e manter conectado por 30 dias</span>
+          </div>
+
+          <button class="btn-sub" id="btn-login" onclick="doLogin()">
+            <i class="ph ph-sign-in"></i> Entrar no painel
+          </button>
+        </div>
+
+        <!-- CADASTRO -->
+        <div class="panel" id="panel-cadastro" role="tabpanel" aria-labelledby="tab-cadastro">
+          <h2 class="panel-title">Novo administrador</h2>
+          <p class="panel-sub">Preencha seus dados. Um administrador precisa aprovar o cadastro antes do primeiro acesso.</p>
+
+          <div class="alert alert-err" id="cad-alert" role="alert">
+            <i class="ph-fill ph-warning-circle"></i><span>Preencha todos os campos obrigatórios.</span>
+          </div>
+          <div class="alert alert-ok" id="cad-success" role="status">
+            <i class="ph-fill ph-check-circle"></i><span>Cadastro enviado! Aguarde a aprovação de um administrador.</span>
+          </div>
+
+          <div class="fields">
+            <div class="row">
+              <div class="field" id="f-nome">
+                <label for="nome">Primeiro nome</label>
+                <div class="iw">
+                  <i class="ph ph-user ii"></i>
+                  <input type="text" id="nome" placeholder="Maria" autocomplete="given-name">
+                </div>
+                <span class="fe">Informe seu primeiro nome.</span>
+              </div>
+              <div class="field" id="f-sobrenome">
+                <label for="sobrenome">Último nome</label>
+                <div class="iw">
+                  <i class="ph ph-user ii"></i>
+                  <input type="text" id="sobrenome" placeholder="Silva" autocomplete="family-name">
+                </div>
+                <span class="fe">Informe seu último nome.</span>
+              </div>
+            </div>
+            <div class="field" id="f-cpf">
+              <label for="cad-cpf">CPF</label>
+              <div class="iw">
+                <i class="ph ph-identification-card ii"></i>
+                <input type="text" id="cad-cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off">
+              </div>
+              <span class="fe">Informe um CPF válido.</span>
+            </div>
+            <div class="field" id="f-whatsapp">
+              <label for="whatsapp">WhatsApp</label>
+              <div class="iw">
+                <i class="ph ph-whatsapp-logo ii"></i>
+                <input type="tel" id="whatsapp" placeholder="(00) 90000-0000" maxlength="15" inputmode="tel" autocomplete="tel">
+              </div>
+              <span class="fe">Informe um número com DDD.</span>
+            </div>
+          </div>
+
+          <button class="btn-sub" id="btn-cadastrar" onclick="doCadastro()">
+            <i class="ph ph-user-check"></i> Enviar cadastro
+          </button>
+        </div>
+
+        <!-- CÓDIGO (login e cadastro) -->
+        <div class="panel" id="panel-codigo" role="tabpanel" aria-labelledby="codigo-titulo">
+          <h2 class="panel-title" id="codigo-titulo">Confirme seu WhatsApp</h2>
+          <p class="panel-sub" id="codigo-sub"></p>
+
+          <div class="alert alert-err" id="codigo-alert" role="alert">
+            <i class="ph-fill ph-warning-circle"></i><span>Código inválido ou expirado.</span>
+          </div>
+
+          <div class="fields">
+            <div class="field" id="f-codigo">
+              <label for="codigo">Código de verificação</label>
+              <div class="iw">
+                <i class="ph ph-shield-check ii"></i>
+                <input type="text" id="codigo" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+              </div>
+              <span class="fe">Informe os 6 dígitos.</span>
+            </div>
+          </div>
+
+          <button class="btn-sub" id="btn-codigo" onclick="doVerificar()">
+            <i class="ph ph-check"></i> Confirmar código
+          </button>
+          <div class="codigo-links">
+            <button type="button" class="link-btn" id="btn-reenviar" onclick="doReenviar()">Reenviar código</button>
+            <button type="button" class="link-btn" onclick="voltarCodigo()">Voltar</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="./auth.js"></script>
+<script src="./login.js"></script>
+</body>
+</html>

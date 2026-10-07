@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Servilar.co — Painel administrativo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="./app.css">
+</head>
+<body>
+
+<!-- Só aparece depois que o servidor confirma a sessão -->
+<div class="app" id="app" hidden>
+
+  <!-- Menu lateral (recolhível) -->
+  <aside class="sb" id="sb" aria-label="Menu principal">
+    <div class="sb-head">
+      <button class="btn-ico" id="sb-toggle" title="Abrir / recolher menu" aria-label="Abrir ou recolher menu" aria-expanded="true"><i class="ph ph-list"></i></button>
+      <img src="../assets/logo-servilar-branco.png" alt="Servilar.co">
+    </div>
+    <nav class="sb-nav" id="nav"></nav>
+    <div class="sb-foot">
+      <button class="btn-ico" id="btn-sair" title="Sair" aria-label="Sair"><i class="ph ph-sign-out"></i></button>
+      <div class="user-info"><strong id="user-nome"></strong><span id="user-papel"></span></div>
+    </div>
+  </aside>
+
+  <!-- Painel de filtros (cada módulo preenche o seu) -->
+  <aside class="fl" id="fl" aria-label="Filtros">
+    <div class="fl-in">
+      <div class="fl-head">
+        <button class="btn-ico fl-toggle" id="fl-toggle" title="Maximizar / minimizar filtros" aria-label="Maximizar ou minimizar filtros" aria-expanded="true"><i class="ph ph-funnel"></i></button>
+        <h2>Filtros</h2>
+        <button class="fl-limpar" id="fl-limpar">Limpar</button>
+        <button class="btn-ico fl-fechar" id="fl-fechar" aria-label="Fechar filtros"><i class="ph ph-x"></i></button>
+      </div>
+      <div class="fl-body" id="filtros"></div>
+    </div>
+  </aside>
+
+  <!-- Centro: o módulo selecionado -->
+  <section class="ct">
+    <header class="ct-head">
+      <button class="btn-ico btn-menu" id="btn-menu" aria-label="Abrir menu"><i class="ph ph-list"></i></button>
+      <h1 id="ct-titulo"></h1>
+      <button class="btn-borda" id="btn-filtros"><i class="ph ph-funnel"></i> Filtros</button>
+    </header>
+    <main class="ct-body" id="conteudo"></main>
+  </section>
+
+  <div class="backdrop" id="backdrop"></div>
+</div>
+
+<div class="erro" id="erro-rede" hidden>
+  <p>Não foi possível confirmar seu acesso. Verifique a conexão e tente novamente.</p>
+  <button onclick="location.reload()">Tentar novamente</button>
+</div>
+
+<script src="../auth.js"></script>
+<script type="module">
+  import { iniciarMenu } from './menu.js';
+  const $ = id => document.getElementById(id);
+  const primeiroNome = n => { const p = (n || '').trim().split(/\s+/)[0].toLowerCase(); return p.charAt(0).toUpperCase() + p.slice(1); };
+
+  const admin = await Auth.exigirSessao('../login.html');
+  if (!admin) {
+    if (Auth.token()) $('erro-rede').hidden = false; // sem rede (senão já foi para o login)
+  } else {
+    $('user-nome').textContent = primeiroNome(admin.nome);
+    $('user-papel').textContent = admin.master ? 'Master' : 'Administrador';
+    $('btn-sair').onclick = () => Auth.sair('../login.html');
+    $('app').hidden = false;
+    iniciarMenu({ admin, Auth });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+/* css/app.css — layout do painel: menu lateral, filtros e área central */
+:root{
+  --teal:#2F9C95; --teal-dark:#1F746F; --teal-soft:#E6F3F2;
+  --bg:#F3F6F6; --surface:#fff; --border:#E3E7E7;
+  --text-1:#14302E; --text-2:#46605E; --text-3:#7C8F8D;
+  --font-title:'Montserrat',system-ui,sans-serif; --font:'Poppins',system-ui,sans-serif;
+  --radius:8px; --radius-lg:12px;
+  --sb-full:224px; --sb-rail:56px; --fl-full:236px; --fl-rail:56px; --bar:52px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+body{height:100dvh;overflow:hidden;font-family:var(--font);font-size:13px;background:var(--bg);color:var(--text-1);-webkit-font-smoothing:antialiased}
+button{font:inherit}
+:focus-visible{outline:3px solid rgba(47,156,149,.45);outline-offset:2px}
+
+.app{--sb-slot:var(--sb-full);--fl-w:var(--fl-full);display:grid;grid-template-columns:var(--sb-slot) var(--fl-w) minmax(0,1fr);height:100dvh;transition:grid-template-columns .18s ease}
+.app.sb-min{--sb-slot:var(--sb-rail)}
+.fl{grid-column:2}
+.ct{grid-column:3}
+
+/* ── Botões ── */
+.btn-ico{width:32px;height:32px;flex:none;display:inline-flex;align-items:center;justify-content:center;border:none;border-radius:8px;background:transparent;color:inherit;font-size:18px;cursor:pointer}
+.btn-borda{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;font-size:13px;font-weight:500;color:var(--text-1);background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);cursor:pointer}
+.btn-borda:hover{border-color:var(--teal);color:var(--teal-dark)}
+
+/* ── Menu lateral: fixo; abre/recolhe (trilho de ícones) só pelo clique no botão ── */
+.sb{position:fixed;inset:0 auto 0 0;z-index:40;width:var(--sb-slot);display:flex;flex-direction:column;overflow:hidden;background:var(--teal-dark);color:#fff;transition:width .18s ease,box-shadow .18s ease}
+.sb .btn-ico:hover{background:rgba(255,255,255,.14)}
+.sb :focus-visible{outline-color:#fff}
+.sb-head{height:var(--bar);flex:none;display:flex;align-items:center;gap:8px;padding:0 12px}
+.sb-head img{height:15px;width:auto}
+.sb-nav{flex:1;overflow:hidden auto;padding:2px 8px}
+.nav-grupo{padding:14px 10px 4px;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;opacity:.65;white-space:nowrap}
+.nav-item{display:flex;align-items:center;gap:10px;height:36px;padding:0 10px;margin-bottom:2px;border-radius:8px;color:inherit;font-size:13px;text-decoration:none;white-space:nowrap}
+.nav-item i{font-size:18px;flex:none}
+.nav-item:hover{background:rgba(255,255,255,.12)}
+.nav-item.ativo{background:#fff;color:var(--teal-dark);font-weight:600}
+.sb-foot{flex:none;display:flex;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid rgba(255,255,255,.18)}
+.user-info{display:flex;flex-direction:column;min-width:0;font-size:13px;line-height:1.3;white-space:nowrap}
+.user-info strong{font-weight:600;overflow:hidden;text-overflow:ellipsis}
+.user-info span{font-size:11px;opacity:.75}
+.sb :is(.nav-txt,.nav-grupo,.user-info,.sb-head img){transition:opacity .12s ease}
+
+/* ── Filtros ── */
+.fl{min-width:0;overflow:hidden;background:var(--surface);border-right:1px solid var(--border)}
+.fl-in{width:var(--fl-full);height:100%;display:flex;flex-direction:column}
+.fl-head{height:var(--bar);flex:none;display:flex;align-items:center;gap:8px;padding:0 12px;border-bottom:1px solid var(--border)}
+.fl-head .btn-ico:hover{background:var(--teal-soft)}
+.fl-head h2,.fl-limpar,.fl-body{transition:opacity .12s ease}
+.fl-head h2{flex:1;white-space:nowrap;font-family:var(--font-title);font-size:14px;font-weight:600}
+.fl-limpar{border:none;background:none;color:var(--teal-dark);font-size:12px;font-weight:500;cursor:pointer;padding:6px 4px}
+.fl-fechar{display:none;color:var(--text-2)}
+.fl-body{flex:1;overflow-y:auto;padding:16px}
+
+/* ── Centro ── */
+.ct{display:flex;flex-direction:column;min-width:0}
+.ct-head{height:var(--bar);flex:none;display:flex;align-items:center;gap:10px;padding:0 20px;background:var(--surface);border-bottom:1px solid var(--border)}
+.ct-head h1{flex:1;min-width:0;font-family:var(--font-title);font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-menu{display:none;color:var(--text-1)}
+#btn-filtros{display:none}
+.ct-body{flex:1;overflow:auto;padding:24px 28px}
+.ct-msg{color:var(--text-2)}
+.backdrop{display:none}
+
+.erro{max-width:400px;margin:20vh auto 0;padding:0 24px;text-align:center}
+.erro p{margin-bottom:16px;color:var(--text-2);line-height:1.6}
+.erro button{height:38px;padding:0 20px;font-weight:600;color:#fff;background:var(--teal-dark);border:none;border-radius:var(--radius);cursor:pointer}
+
+/* ── Desktop ── */
+@media (min-width:901px){
+  /* menu recolhido = trilho só de ícones */
+  .sb-min .sb :is(.nav-txt,.nav-grupo,.user-info,.sb-head img){opacity:0}
+  .sb-min .sb .nav-grupo{height:1px;padding:0;margin:10px 8px;background:rgba(255,255,255,.22);font-size:0}
+  /* filtros recolhidos = trilho só com o botão */
+  .app.fl-min{--fl-w:var(--fl-rail)}
+  .fl-min .fl :is(h2,.fl-limpar,.fl-body){opacity:0;visibility:hidden}
+}
+
+/* ── Mobile: menu e filtros viram gavetas ── */
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .ct{grid-column:1}
+  .sb,.fl{position:fixed;top:0;bottom:0;z-index:30;transition:transform .2s ease}
+  .sb{width:248px;transform:translateX(-100%)}
+  .fl{right:0;width:min(300px,88vw);transform:translateX(100%);border-left:1px solid var(--border)}
+  .fl-in{width:100%}
+  .fl-fechar,.btn-menu,#btn-filtros{display:inline-flex}
+  .fl-toggle{display:none}
+  .app.sb-open .sb,.app.fl-open .fl{transform:none}
+  .app.sb-open .backdrop,.app.fl-open .backdrop{display:block;position:fixed;inset:0;z-index:20;background:rgba(10,30,28,.45)}
+  .ct-head{padding:0 12px}
+  .ct-body{padding:14px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
