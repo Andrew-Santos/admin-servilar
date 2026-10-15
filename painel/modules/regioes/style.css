@@ -110,3 +110,24 @@
     .rg-painel{flex:none}
   #rg-sel,#rg-cad{flex:none;max-height:40vh}
 }
+/* ───────── fundo do mapa (ruas / relevo / satélite) ───────── */
+.rg-tiles{pointer-events:none}
+.rg-base{position:absolute;top:10px;left:10px;z-index:1;height:34px;padding:0 8px;font:inherit;font-size:13px;color:var(--text-1);background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 1px 3px rgba(0,0,0,.08);cursor:pointer}
+.rg-attr{position:absolute;right:6px;bottom:3px;z-index:1;max-width:60%;padding:1px 5px;font-size:10px;line-height:1.3;color:var(--text-2);background:rgba(255,255,255,.8);border-radius:4px;pointer-events:none}
+.rg-attr:empty{display:none}
+
+/* com fundo: polígonos viram "vidro" — contorno visível, preenchimento leve, cores de estado mais fortes */
+#rg-svg:not([data-base="limpo"]) path{fill:#fff;fill-opacity:.06;stroke:#1F4F4B;stroke-opacity:.75;stroke-width:1.1}
+#rg-svg:not([data-base="limpo"]) path:hover{fill:#2F9C95;fill-opacity:.3}
+#rg-svg:not([data-base="limpo"]) path.sel{fill:#E3732D;fill-opacity:.5;stroke:#B85A1F;stroke-opacity:1;stroke-width:1.8}
+#rg-svg:not([data-base="limpo"]) path.reg{fill:var(--teal);fill-opacity:.45;stroke:var(--teal-dark);stroke-opacity:1;stroke-width:1.8}
+#rg-svg:not([data-base="limpo"]) path.off{fill:var(--teal);fill-opacity:.2;stroke:var(--teal-dark);stroke-opacity:1}
+#rg-svg:not([data-base="limpo"]) path.sel:hover{fill-opacity:.65}
+/* satélite: contorno claro para destacar sobre imagem escura */
+#rg-svg[data-base="satelite"] path{stroke:#fff;stroke-opacity:.9}
+#rg-svg[data-base="satelite"] path.sel{stroke:#FFB27A}
+#rg-svg[data-base="satelite"] path.reg,#rg-svg[data-base="satelite"] path.off{stroke:#7FE0D8}
+
+/* dentro de um estado, com fundo: divisas das cidades só aparecem quando selecionada/cadastrada/desativada (ou ao passar o mouse) */
+#rg-svg:not([data-base="limpo"])[data-nivel="uf"] path:not(.sel):not(.reg):not(.off){stroke-opacity:0}
+#rg-svg:not([data-base="limpo"])[data-nivel="uf"] path:not(.sel):not(.reg):not(.off):hover{stroke-opacity:.7}

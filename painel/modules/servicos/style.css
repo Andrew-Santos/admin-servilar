@@ -1,0 +1,250 @@
+/* modules/servicos/style.css
+   Só usa os tokens do app.css (teal, cinza claro, texto) e o laranja da paleta (#E3732D e seu tom escuro #B85A1F).
+   Laranja = comissão da plataforma · Teal = repasse ao profissional (em toda a tela).
+   Este arquivo é carregado ao abrir o módulo e REMOVIDO ao sair (menu.js), então não afeta as outras telas. */
+
+.ct-body.mod-servicos{display:flex;flex-direction:column;overflow:auto}
+.ct-body.mod-servicos.sv-modal{overflow:hidden}   /* trava a rolagem do fundo com o modal aberto */
+.sv{flex:1;min-height:360px;display:flex;flex-direction:column}
+.sv [hidden]{display:none !important}   /* garante que `hidden` vença os display:flex abaixo */
+.sv button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+
+/* marcadores de cor (comissão × repasse) */
+.dot{flex:none;display:inline-block;width:8px;height:8px;border-radius:50%}
+.dot.plat{background:#E3732D}
+.dot.rep{background:var(--teal)}
+
+/* ── cartão da tabela ── */
+.sv-main{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+.sv-bar{flex:none;display:flex;align-items:center;gap:16px;padding:16px 20px;border-bottom:1px solid var(--border)}
+.sv-tit{flex:1;min-width:0;display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px}
+.sv-tit h2{font-family:var(--font-title);font-size:16px;font-weight:600}
+.sv-tit b{align-self:center;min-width:22px;padding:2px 7px;font-size:11px;font-weight:600;text-align:center;color:var(--teal-dark);background:var(--teal-soft);border-radius:10px}
+.sv-sub{font-size:12px;color:var(--text-3)}
+.sv-novo{flex:none;display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 16px;font-size:13px;font-weight:600;color:#fff;background:var(--teal-dark);border:none;border-radius:var(--radius);cursor:pointer;transition:background .12s}
+.sv-novo:hover{background:var(--teal)}
+
+/* ── tabela ── */
+.sv-tbw{flex:1;min-height:0;overflow:auto}
+.sv-tb{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;font-variant-numeric:tabular-nums}
+.sv-tb .c-esp{width:190px}
+.sv-tb .c-val{width:132px}
+.sv-tb .c-pl,.sv-tb .c-rp{width:128px}
+.sv-tb .c-st{width:112px}
+.sv-tb .c-go{width:44px}
+.sv-tb th{position:sticky;top:0;z-index:1;padding:11px 16px;text-align:left;font-size:12px;font-weight:600;color:var(--text-3);background:var(--bg);box-shadow:inset 0 -1px 0 var(--border)}
+.sv-tb th.r,.sv-tb td.r{text-align:right}
+.sv-tb td{height:68px;padding:0 16px;font-size:13px;vertical-align:middle;border-bottom:1px solid var(--border)}
+.sv-tb tbody tr:last-child td{border-bottom:none}
+.sv-tb tbody tr{cursor:pointer;transition:background .1s}
+.sv-tb tbody tr:hover{background:rgba(47,156,149,.05)}
+.sv-tb tbody tr:hover td:first-child{box-shadow:inset 3px 0 0 var(--teal)}
+.sv-tb tbody tr.sem-hover{cursor:default}
+.sv-tb tbody tr.sem-hover:hover{background:none}
+.sv-tb tbody tr.sem-hover:hover td:first-child{box-shadow:none}
+
+/* serviço: nome + descrição numa coluna só */
+.sv-tb td.nm{overflow:hidden}
+.nmw{display:flex;flex-direction:column;gap:3px;min-width:0}
+.nb{max-width:100%;padding:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;font:inherit;font-weight:600;letter-spacing:.015em;color:var(--text-1);background:none;border:none;cursor:pointer}
+.ds{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--text-3)}
+.ds.sem{opacity:.65}
+
+/* especialidade como etiqueta */
+.sv-tb td.ep{overflow:hidden}
+.chip{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;padding:0 9px;font-size:12px;font-weight:500;line-height:24px;color:var(--text-2);background:var(--bg);border:1px solid var(--border);border-radius:6px}
+.chip.alerta{color:#B85A1F;background:rgba(227,115,45,.08);border-color:rgba(227,115,45,.3)}
+
+/* valores: direita, algarismos tabulares, percentual embaixo */
+.mn{display:flex;flex-direction:column;align-items:flex-end;gap:3px;line-height:1.2}
+.mn strong{font-weight:600;white-space:nowrap;color:var(--text-1)}
+.mn small{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-3)}
+.mn .dot{width:6px;height:6px}
+
+.sv-tb td.go{text-align:right;font-size:14px;color:var(--text-3)}
+.sv-tb tbody tr:hover td.go{color:var(--teal-dark)}
+.sv-tb tr.off .nb,.sv-tb tr.off .mn strong{color:var(--text-3)}
+.sv-tb tr.off .chip{opacity:.7}
+.sv-tb td.sv-vazio{height:auto;padding:48px 16px;text-align:center;font-size:13px;line-height:1.6;color:var(--text-3)}
+.sv-tb td.sv-vazio button{margin-top:12px}
+
+.sv-pill{display:inline-flex;align-items:center;gap:6px;padding:0 9px;font-size:11.5px;font-weight:600;line-height:22px;white-space:nowrap;border-radius:11px}
+.sv-pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.sv-pill.on{color:var(--teal-dark);background:var(--teal-soft)}
+.sv-pill.off{color:var(--text-3);background:var(--bg)}
+
+/* ── modal ── */
+.sv-ov{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(10,30,28,.45)}
+.sv-dlg{width:min(660px,100%);max-height:100%;display:flex;flex-direction:column;background:#fff;border-radius:var(--radius-lg);box-shadow:0 24px 60px rgba(10,30,28,.3);outline:none;animation:sv-in .16s ease-out}
+@keyframes sv-in{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.sv-dlg{animation:none}}
+.sv-dh{flex:none;display:flex;align-items:flex-start;gap:12px;padding:18px 14px 16px 24px;border-bottom:1px solid var(--border)}
+.sv-dh:has(.sv-hs[hidden]){align-items:center}   /* formulário: título centralizado (sem linha de etiquetas) */
+.sv-ht{flex:1;min-width:0;display:flex;flex-direction:column;gap:9px}
+.sv-dh h3{font-family:var(--font-title);font-size:17px;font-weight:600;line-height:1.3;letter-spacing:.01em;overflow-wrap:anywhere}
+.sv-hs{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.sv-sujo{flex:none;align-self:center;font-size:11px;font-weight:500;color:#B85A1F}
+.sv-dacoes{flex:none;display:flex;gap:2px}
+.sv-ib{width:36px;height:36px;display:grid;place-items:center;font-size:18px;color:var(--text-2);background:none;border:none;border-radius:8px;cursor:pointer;transition:background .12s}
+.sv-ib:hover{color:var(--teal-dark);background:var(--teal-soft)}
+.sv-db{flex:1;min-height:0;overflow:auto;padding:22px 24px 26px}
+.sv-df{flex:none;display:flex;flex-direction:column;gap:8px;padding:14px 24px;border-top:1px solid var(--border);background:var(--bg);border-radius:0 0 var(--radius-lg) var(--radius-lg)}
+.sv-acoes{display:flex;align-items:center;gap:8px}
+.sv-esp{flex:1}
+.sv-acoes .btn-borda,.sv-conf .btn-borda{height:36px}
+#sv-msg{font-size:12px;line-height:1.4;color:var(--text-2)}
+#sv-msg:empty{display:none}
+.sv-ex{height:36px;padding:0 4px;font-size:13px;font-weight:500;color:var(--text-2);background:none;border:none;cursor:pointer;text-decoration:underline}
+.sv-ex:hover{color:var(--teal-dark)}
+.sv-salvar,.sv-sim{height:36px;padding:0 20px;font-size:13px;font-weight:600;color:#fff;background:var(--teal-dark);border:none;border-radius:var(--radius);cursor:pointer;transition:background .12s}
+.sv-salvar:hover:not(:disabled),.sv-sim:hover{background:var(--teal)}
+.sv-salvar:disabled{opacity:.45;cursor:default}
+#sv-cancelar:disabled{opacity:.45;cursor:default}
+.sv-conf{display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:13px;background:var(--teal-soft);border-radius:var(--radius)}
+.sv-conf span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* títulos de seção (visualização e formulário) */
+.sv-info + .sv-info,.sv-sc + .sv-sc{margin-top:26px}
+.sv-sc + .sv-sc{padding-top:24px;border-top:1px solid var(--border)}
+.sv-info h4,.sv-sh{margin-bottom:12px;font-size:13px;font-weight:600;color:var(--text-1)}
+.txt{font-size:14px;line-height:1.6;white-space:pre-wrap;color:var(--text-1)}
+.txt.mudo{color:var(--text-3)}
+
+/* visualização: composição do valor */
+.sv-comp{overflow:hidden;border:1px solid var(--border);border-radius:var(--radius-lg)}
+.sv-total{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:16px 18px 14px}
+.sv-total span{font-size:13px;font-weight:500;color:var(--text-2)}
+.sv-total strong{font-family:var(--font-title);font-size:24px;font-weight:700;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.sv-comp .sv-barra{margin:0 18px}
+.sv-lgs{margin-top:16px;border-top:1px solid var(--border)}
+.sv-lg{display:grid;grid-template-columns:minmax(0,1fr) auto 112px;align-items:center;gap:12px;padding:12px 18px;font-size:13px;font-variant-numeric:tabular-nums}
+.sv-lg + .sv-lg{border-top:1px solid var(--border)}
+.sv-lg .lb{display:flex;align-items:center;gap:9px;color:var(--text-2)}
+.sv-lg .pc{color:var(--text-3)}
+.sv-lg .vl{text-align:right;font-weight:600}
+
+/* barra de proporção */
+.sv-barra{display:flex;height:8px;overflow:hidden;background:var(--border);border-radius:4px}
+.sv-barra .plat{background:#E3732D;transition:width .18s ease-out}
+.sv-barra .rep{background:var(--teal);transition:width .18s ease-out}
+@media (prefers-reduced-motion:reduce){.sv-barra span{transition:none}}
+
+/* formulário: campos básicos */
+.sv-fg{margin-bottom:16px}
+.sv-fg:last-child{margin-bottom:0}
+.sv-linha{display:flex;align-items:center;justify-content:space-between}
+.sv-lbl{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;font-size:12px;font-weight:600;color:var(--text-2)}
+.sv-linha .sv-lbl{margin:0}
+.sv-lbl small{font-weight:400;color:var(--text-3)}
+.sv-campo{width:100%;height:38px;padding:0 12px;font:inherit;font-size:13px;color:var(--text-1);background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);transition:border-color .12s,box-shadow .12s}
+.sv-campo:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(47,156,149,.15)}
+.sv-campo:disabled{color:var(--text-3);background:var(--bg)}
+.sv-campo.sv-up{font-weight:600;letter-spacing:.02em}
+.sv-campo.sv-up::placeholder{font-weight:400;letter-spacing:.02em}
+textarea.sv-campo{height:auto;min-height:72px;max-height:160px;padding:9px 12px;line-height:1.5;resize:vertical}
+.sv-sw{position:relative;display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--text-2);cursor:pointer}
+.sv-sw input{position:absolute;width:1px;height:1px;opacity:0}
+.sv-trilho{position:relative;width:36px;height:20px;background:var(--border);border-radius:10px;transition:background .15s}
+.sv-trilho::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:transform .15s}
+.sv-sw input:checked + .sv-trilho{background:var(--teal)}
+.sv-sw input:checked + .sv-trilho::after{transform:translateX(16px)}
+.sv-sw input:focus-visible + .sv-trilho{outline:3px solid rgba(47,156,149,.45);outline-offset:2px}
+
+/* formulário: composição do valor — percentual e valor lado a lado */
+.sv-fl{display:grid;grid-template-columns:minmax(0,1fr) 112px 148px;gap:10px 12px;align-items:center}
+.sv-th{font-size:12px;font-weight:500;color:var(--text-3)}
+.sv-fl .lb{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:500;color:var(--text-1)}
+.sv-fixo{display:flex;align-items:center;justify-content:flex-end;height:38px;padding:0 12px;font-size:13px;color:var(--text-3)}
+.sv-ad{position:relative}
+.sv-ad span{position:absolute;top:50%;transform:translateY(-50%);left:12px;font-size:13px;font-weight:500;color:var(--text-3);pointer-events:none}
+.sv-ad .sv-campo{padding-left:34px}
+.sv-ad.dir span{left:auto;right:12px}
+.sv-ad.dir .sv-campo{padding-left:12px;padding-right:30px}
+.sv-campo.num{text-align:right;font-variant-numeric:tabular-nums}
+#sv-prev{margin-top:18px}
+.sv-dica{margin-top:12px;font-size:12px;line-height:1.5;color:var(--text-3)}
+
+/* ── abas da visualização ── */
+.sv-tabs{flex:none;display:flex;gap:22px;padding:0 24px;border-bottom:1px solid var(--border)}
+.sv-dlg:has(.sv-tabs:not([hidden])) .sv-dh{border-bottom:none;padding-bottom:6px}
+.sv-tab{display:inline-flex;align-items:center;gap:7px;padding:10px 0 11px;margin-bottom:-1px;font:inherit;font-size:13px;font-weight:500;color:var(--text-3);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer}
+.sv-tab:hover{color:var(--text-1)}
+.sv-tab[aria-selected="true"]{font-weight:600;color:var(--teal-dark);border-bottom-color:var(--teal-dark)}
+.sv-tab b{min-width:18px;padding:1px 6px;font-size:11px;font-weight:600;text-align:center;color:var(--teal-dark);background:var(--teal-soft);border-radius:9px}
+
+/* ── aba "Preços por município" ── */
+.sv-rgh{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+.sv-rgh .txt{font-size:13px;line-height:1.5}
+.sv-rga{flex:none;height:34px;padding:0 14px;font-size:13px}
+.sv-rga:disabled{opacity:.5;cursor:default}
+.sv-vz{display:flex;flex-direction:column;align-items:center;gap:6px;padding:36px 24px;text-align:center;border:1.5px dashed var(--border);border-radius:var(--radius-lg)}
+.sv-vz strong{font-size:14px}
+.sv-vz p{max-width:380px;margin-bottom:10px;font-size:13px;line-height:1.55;color:var(--text-3)}
+.sv-ptw{overflow:hidden;border:1px solid var(--border);border-radius:var(--radius-lg)}
+.sv-pt{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;font-variant-numeric:tabular-nums}
+.sv-pt .c-v{width:104px}
+.sv-pt .c-g{width:40px}
+.sv-pt .rg-n{display:flex;align-items:center;gap:8px;min-width:0}
+.sv-pt .rg-n .nb{flex:0 1 auto;min-width:0}
+.sv-pt .rg-n .sv-pill{flex:none}
+.sv-pt th{padding:9px 14px;text-align:left;font-size:12px;font-weight:600;color:var(--text-3);background:var(--bg);box-shadow:inset 0 -1px 0 var(--border)}
+.sv-pt th.r,.sv-pt td.r{text-align:right}
+.sv-pt td{height:62px;padding:0 14px;font-size:13px;vertical-align:middle;border-bottom:1px solid var(--border)}
+.sv-pt tbody tr:last-child td{border-bottom:none}
+.sv-pt td.nm{overflow:hidden}
+.sv-pt tr.pad td{background:var(--bg)}
+.sv-pt tr.pad .nb{font-weight:600;cursor:default}
+.sv-pt tr.regra{cursor:pointer;transition:background .1s}
+.sv-pt tr.regra:hover{background:rgba(47,156,149,.05)}
+.sv-pt tr.regra.off .nb,.sv-pt tr.regra.off .mn strong{color:var(--text-3)}
+.sv-pt td.go{text-align:right;color:var(--text-3)}
+.sv-pt .mn small{font-size:11.5px}
+
+/* ── preço por município: formulário ── */
+.sv-nm{margin-left:8px;font-weight:400;color:var(--text-3)}
+.sv-chips{display:flex;flex-wrap:wrap;gap:6px;max-height:96px;overflow:auto;margin-bottom:12px}
+.sv-ch{display:inline-flex;align-items:center;gap:2px;padding:0 4px 0 10px;font-size:12px;line-height:26px;color:var(--teal-dark);background:var(--teal-soft);border-radius:13px}
+.sv-ch button{width:20px;height:20px;display:grid;place-items:center;font-size:11px;color:inherit;background:none;border:none;border-radius:50%;cursor:pointer}
+.sv-ch button:hover{background:rgba(31,127,121,.18)}
+.sv-ch-vazio{font-size:12px;line-height:26px;color:var(--text-3)}
+.sv-bus{display:grid;grid-template-columns:minmax(0,1fr) 176px;gap:8px}
+.sv-mun{list-style:none;margin:8px 0 0;padding:0;max-height:220px;overflow:auto;border:1px solid var(--border);border-radius:var(--radius)}
+.sv-mun li + li{border-top:1px solid var(--border)}
+.sv-mun label{display:flex;align-items:center;gap:10px;padding:8px 12px;font-size:13px;cursor:pointer}
+.sv-mun label:hover{background:var(--teal-soft)}
+.sv-mun label.bloq{cursor:default;color:var(--text-3);background:var(--bg)}
+.sv-mun input{flex:none;width:16px;height:16px;accent-color:var(--teal-dark)}
+.sv-mun .mn-n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sv-mun small{flex:none;font-size:11.5px;color:var(--text-3)}
+.sv-mun li.mais{padding:14px 12px;text-align:center;font-size:12px;color:var(--text-3)}
+.sv-munr{display:flex;justify-content:space-between;gap:12px;min-height:22px;margin-top:8px}
+.sv-lk{padding:2px 0;font:inherit;font-size:12px;color:var(--text-2);background:none;border:none;text-decoration:underline;cursor:pointer}
+.sv-lk:hover{color:var(--teal-dark)}
+.sv-ref{margin:-4px 0 14px}
+
+/* aviso rápido */
+.sv-toast{position:fixed;left:50%;bottom:28px;z-index:70;transform:translateX(-50%);max-width:calc(100% - 32px);padding:11px 18px;font-size:13px;font-weight:500;color:#fff;background:var(--teal-dark);border-radius:var(--radius);box-shadow:0 8px 24px rgba(10,30,28,.25)}
+
+/* ── telas pequenas ── */
+@media (max-width:900px){
+  .sv-tb .c-esp,.sv-tb th:nth-child(2),.sv-tb td:nth-child(2){display:none}
+}
+@media (max-width:600px){
+  .sv-ov{align-items:flex-end;padding:0}
+  .sv-dlg{width:100%;max-height:92dvh;border-radius:16px 16px 0 0}
+  .sv-bar{flex-wrap:wrap}
+  /* só nome + valor: comissão, repasse, status e seta ficam para o modal (linhas inativas já aparecem esmaecidas) */
+  .sv-tb th:nth-child(n+4),.sv-tb td:nth-child(n+4),.sv-tb .c-pl,.sv-tb .c-rp,.sv-tb .c-st,.sv-tb .c-go{display:none}
+  .sv-tb .c-val{width:112px}
+  .nb{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.3}
+  .sv-fl{grid-template-columns:1fr 1fr}
+  .sv-fl .sv-th,.sv-fl .sv-fixo{display:none}
+  .sv-fl .lb{grid-column:1/-1;margin-top:4px}
+  .sv-fl .lb:first-of-type{margin-top:0}
+  .sv-fl .sv-ad.tot{grid-column:1/-1}
+  .sv-bus{grid-template-columns:1fr}
+  .sv-pt .c-x,.sv-pt th.c-x,.sv-pt td.c-x{display:none}
+  .sv-pt .nb{display:block;white-space:nowrap}
+  .sv-rgh{flex-direction:column;align-items:stretch}
+  .sv-tabs{gap:16px;padding:0 16px}
+}

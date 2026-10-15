@@ -1,6 +1,6 @@
 // modules/regioes/module.js
 import * as data from './data.js';
-import { desenhar } from './ui.js';
+import { desenhar, FONTES } from './ui.js';
 import { cadastrar, alterarAtivo, remover } from './actions.js';
 
 let vivo = false;
@@ -18,6 +18,8 @@ export default {
           <div class="rg-bar"><button class="btn-borda" id="rg-voltar" hidden><i class="ph ph-arrow-left"></i> Brasil</button><span id="rg-dica" role="status">Carregando mapa…</span></div>
           <div class="rg-stage">
             <svg id="rg-svg" role="img" aria-label="Mapa do Brasil"></svg>
+            <select id="rg-base" class="rg-base" aria-label="Fundo do mapa">${Object.entries(FONTES).map(([k, f]) => `<option value="${k}">${f.nome}</option>`).join('')}</select>
+            <small class="rg-attr" id="rg-attr"></small>
             <div class="rg-zoom">
               <button type="button" id="rg-zin" aria-label="Aproximar" title="Aproximar"><i class="ph ph-plus"></i></button>
               <button type="button" id="rg-zout" aria-label="Afastar" title="Afastar"><i class="ph ph-minus"></i></button>
@@ -59,6 +61,10 @@ export default {
     const reg = new Set(), pend = new Map();
     const cad = new Map(), semCodigo = [];   // cadastradas: com código IBGE (no mapa) / linhas antigas sem código
     let uf = '', nomes = new Map(), paths = new Map(), mapa = null, seq = 0;
+    let fundo = 'ruas';   // fundo padrão; a escolha é mantida ao trocar de estado
+    const aplicarFundo = () => { mapa?.camada(fundo); $('#rg-attr').textContent = FONTES[fundo]?.attr || ''; };
+    $('#rg-base').value = fundo;
+    $('#rg-base').onchange = e => { fundo = e.target.value; aplicarFundo(); };
 
     const msg = t => { $('#rg-msg').textContent = t; };
     const aba = c => {   // 'p' = para cadastrar, 'c' = cadastradas
@@ -73,6 +79,7 @@ export default {
       if (!texto) return null;
       if (reg.has(n)) return { texto, peso: 3, classe: cad.get(n)?.ativo === false ? 'off' : 'reg' };
       if (pend.has(n)) return { texto, peso: 2, classe: 'sel' };
+      if (fundo === 'ruas' || fundo === 'relevo') return null;   // o próprio fundo já nomeia as cidades; aqui só destacamos as suas
       return data.CAPITAIS.has(n) ? { texto, peso: 1, classe: 'cap' } : { texto, peso: 0, classe: '' };
     };
 
@@ -199,6 +206,8 @@ export default {
           rotulo,
         });
         paths = mapa.paths;
+        svg.dataset.nivel = sigla ? 'uf' : 'br';   // o CSS usa isso para esconder divisas de cidades (não as de estados)
+        aplicarFundo();
         dica.textContent = sigla ? 'Clique nas cidades para selecionar · role para dar zoom, arraste para mover' : 'Clique em um estado · role para dar zoom';
         pintar();
       } catch (e) {

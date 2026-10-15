@@ -15,68 +15,55 @@ export const h = (tag, props = {}, ...filhos) => {
 };
 export const icone = nome => h('i', { class: `ph ph-${nome}` });
 export const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
-
-// Estado vazio dentro de uma <ul> (lista de cidades)
 export const vazio = (...filhos) => h('li', { class: 'es-vazio' }, ...filhos);
-// Estado vazio dentro da tabela (ocupa a linha inteira)
-export const vazioTabela = (...filhos) =>
-  h('tr', { class: 'es-vazio' }, h('td', { colspan: 5 }, h('div', { class: 'es-vz' }, ...filhos)));
+export const vazioTb = (...filhos) => h('tr', { class: 'sem-hover' }, h('td', { colspan: 5, class: 'es-vazio' }, ...filhos));
 
-// Monograma colorido: a cor sai do nome, então cada especialidade tem sempre a mesma "cara" (reconhecimento rápido)
-const PAL = ['#2F9C95', '#E3732D', '#5B7FA6', '#7E9E5C', '#9A6A9C', '#C2923B'];
-export function avatar(nome, icon) {
-  let k = 0; for (const c of nome) k = (k * 31 + c.codePointAt(0)) >>> 0;
-  return h('span', { class: 'es-av', style: `--c:${PAL[k % PAL.length]}`, 'aria-hidden': 'true' }, icon ? icone(icon) : (nome.trim()[0] || '?'));
-}
-
-// Linha da tabela: clicar abre a leitura; o lápis abre a edição; o botão power ativa/desativa
-export function linhaTabela(e, { ufs, onVer, onEditar, onStatus }) {
+// ── Tabela ──
+// Uma linha por especialidade; clicar em qualquer ponto abre o modal de visualização
+export function linhaTb(e, { ufs, onAbrir }) {
   const n = e.regioes.length;
   const tags = ufs.slice(0, 4).map(u => h('span', { class: 'tag', text: u }));
   if (ufs.length > 4) tags.push(h('span', { class: 'tag', text: `+${ufs.length - 4}` }));
-  const parar = fn => ev => { ev.stopPropagation(); fn(); };
-  const rotE = 'Editar ' + e.nome;
-  const rotS = (e.status ? 'Desativar ' : 'Ativar ') + e.nome;
-  return h('tr', { class: 'es-tr' + (e.status ? '' : ' off'), onclick: () => onVer() },
-    h('td', { class: 'c-nome' },
-      h('div', { class: 'es-id' }, avatar(e.nome),
-        h('button', { type: 'button', class: 'es-nm', text: e.nome, title: e.nome }))),
-    h('td', { class: 'c-desc' },
-      h('span', { class: 'es-d' + (e.descricao ? '' : ' sem'), text: e.descricao || 'Sem descrição' })),
-    h('td', { class: 'c-reg' }, n
-      ? h('div', { class: 'es-rg' }, h('span', { class: 'es-rn', text: plural(n, 'cidade', 'cidades') }), h('span', { class: 'es-tags' }, ...tags))
-      : h('span', { class: 'alerta', text: 'Sem regiões' })),
-    h('td', { class: 'c-st' },
-      h('span', { class: 'es-sd ' + (e.status ? 'on' : 'off'), text: e.status ? 'Ativa' : 'Inativa' })),
-    h('td', { class: 'c-ac' },
-      h('div', { class: 'es-ics' },
-        h('button', { type: 'button', class: 'es-ic', title: rotE, 'aria-label': rotE, onclick: parar(onEditar) }, icone('pencil-simple')),
-        h('button', { type: 'button', class: 'es-ic pw' + (e.status ? ' ligada' : ''), title: rotS, 'aria-label': rotS, onclick: parar(onStatus) }, icone('power')))));
+  return h('tr', { class: e.status ? '' : 'off', onclick: onAbrir },
+    h('td', { class: 'nm' }, h('button', { type: 'button', text: e.nome, title: 'Ver detalhes' })),
+    h('td', { class: 'dc' + (e.descricao ? '' : ' sem'), title: e.descricao || null, text: e.descricao || '—' }),
+    h('td', {}, h('div', { class: 'rgw' },
+      n ? h('span', { class: 'cnt', text: plural(n, 'cidade', 'cidades') }) : h('span', { class: 'cnt alerta', text: 'Sem regiões' }),
+      ...tags)),
+    h('td', {}, pill(e.status)),
+    h('td', { class: 'go' }, icone('caret-right')));
 }
+export const pill = ativo => h('span', { class: 'es-pill ' + (ativo ? 'on' : 'off'), text: ativo ? 'Ativa' : 'Inativa' });
 
-// Conteúdo do modal de leitura
-export function detalheEsp(e, porId) {
-  const por = new Map(); let orfas = 0;
+// ── Modal de visualização ──
+const bloco = (rotulo, ...filhos) => h('section', { class: 'es-info' }, h('h4', { text: rotulo }), ...filhos);
+
+export function corpoVer(e, porId) {
+  const grupos = new Map(); let orfas = 0;
   e.regioes.forEach(i => {
     const r = porId.get(i);
     if (!r) { orfas++; return; }
-    if (!por.has(r.uf)) por.set(r.uf, []);
-    por.get(r.uf).push(r.cidade);
+    if (!grupos.has(r.uf)) grupos.set(r.uf, []);
+    grupos.get(r.uf).push(r);
   });
-  const grupos = [...por.entries()].sort(([a], [b]) => a.localeCompare(b, 'pt'));
-  return h('div', { class: 'es-lv' },
-    h('div', { class: 'es-sec' }, h('span', { text: 'Descrição' })),
-    h('p', { class: 'es-lv-d' + (e.descricao ? '' : ' sem'), text: e.descricao || 'Sem descrição cadastrada.' }),
-    h('div', { class: 'es-sec' }, h('span', { text: 'Regiões atendidas' }), h('b', { text: e.regioes.length })),
-    grupos.length
-      ? h('div', { class: 'es-grps' }, ...grupos.map(([uf, cidades]) =>
-          h('div', { class: 'es-grp' },
-            h('div', { class: 'es-grp-t' }, h('strong', { text: uf }), h('span', { text: plural(cidades.length, 'cidade', 'cidades') })),
-            h('ul', { class: 'es-cids' }, ...cidades.sort((a, b) => a.localeCompare(b, 'pt')).map(c => h('li', { text: c }))))))
-      : h('p', { class: 'es-lv-d sem', text: 'Nenhuma região vinculada.' }),
-    orfas ? h('p', { class: 'es-orf', text: `${plural(orfas, 'código não existe', 'códigos não existem')} mais em Regiões.` }) : null);
+  const n = e.regioes.length - orfas;
+  const regioes = n || orfas
+    ? [
+        n ? h('p', { class: 'es-resumo', text: `${plural(n, 'cidade', 'cidades')} em ${plural(grupos.size, 'estado', 'estados')}` }) : null,
+        ...[...grupos].sort(([a], [b]) => a.localeCompare(b)).map(([uf, lista]) =>
+          h('div', { class: 'es-g' },
+            h('div', { class: 'es-gt' }, h('strong', { text: uf }), h('span', { text: plural(lista.length, 'cidade', 'cidades') })),
+            h('div', { class: 'es-gc' }, ...lista.sort((a, b) => a.cidade.localeCompare(b.cidade, 'pt'))
+              .map(r => h('span', { class: 'es-ci' + (r.ativo === false ? ' off' : ''), text: r.cidade + (r.ativo === false ? ' (desativada)' : '') }))))),
+        orfas ? h('p', { class: 'txt alerta', text: `${plural(orfas, 'código sem cadastro', 'códigos sem cadastro')} em Regiões.` }) : null,
+      ]
+    : [h('p', { class: 'txt alerta', text: 'Nenhuma região definida.' })];
+  return h('div', {},
+    bloco('Descrição', h('p', { class: 'txt' + (e.descricao ? '' : ' mudo'), text: e.descricao || 'Sem descrição.' })),
+    bloco('Regiões atendidas', ...regioes));
 }
 
+// ── Seletor de regiões (modal de cadastro/edição) ──
 // Cidade como botão de marcar (a caixa fica escondida; o visual vem do .ck)
 export function itemRegiao(r, marcada, onChange) {
   return h('li', {},

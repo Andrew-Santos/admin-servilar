@@ -2,8 +2,21 @@
 // Inclui: zoom (roda do mouse, pinça, botões), arrastar para mover e rótulos de cidades
 // que aparecem conforme o zoom (sem sobreposição).
 const NS = 'http://www.w3.org/2000/svg';
-const ZOOM_MAX = 80;   // quantas vezes dá para aproximar em relação à vista inicial
+const ZOOM_MAX = 400;  // quantas vezes dá para aproximar em relação à vista inicial (400 chega no nível de ruas)
 const PX = 11;         // tamanho padrão do texto dos rótulos, em pixels de tela
+
+// Fundos do mapa. Todos usam tiles XYZ em Web Mercator. Para uso intenso/produção, troque por um
+// provedor com chave (MapTiler, Stadia, Mapbox...) — os servidores abaixo são gratuitos, com política de uso justo.
+export const FONTES = {
+  limpo:    { nome: 'Sem fundo', attr: '' },
+  ruas:     { nome: 'Ruas', max: 19, attr: '© OpenStreetMap',
+              url: (z, x, y) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png` },
+  relevo:   { nome: 'Relevo', max: 17, attr: '© OpenStreetMap · SRTM · OpenTopoMap (CC-BY-SA)',
+              url: (z, x, y) => `https://a.tile.opentopomap.org/${z}/${x}/${y}.png` },
+  satelite: { nome: 'Satélite', max: 19, attr: 'Esri, Maxar, Earthstar Geographics',
+              url: (z, x, y) => `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}` },
+};
+const merc = lat => Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360)) * 180 / Math.PI;   // latitude -> y Mercator (em "graus")
 
 // Área e centroide de um anel já projetado (relativo ao 1º ponto, para manter precisão)
 function anel(pts) {
@@ -32,7 +45,7 @@ export function desenhar(svg, geo, { clique, hover, rotulo }) {
     for (const poli of g.type === 'Polygon' ? [g.coordinates] : g.coordinates)
       poli.forEach((raw, i) => {
         if (!raw.length) return;
-        const pts = raw.map(([lon, lat]) => [lon * 0.966, -lat]);
+        const pts = raw.map(([lon, lat]) => [lon, -merc(lat)]);   // Web Mercator: 1 unidade = 1° de longitude
         for (const [x, y] of pts) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
         d += 'M' + pts.map(([x, y]) => x.toFixed(3) + ' ' + y.toFixed(3)).join('L') + 'Z';
         if (i === 0) { const r = anel(pts); total += r.area; if (!maior || r.area > maior.area) maior = r; }
@@ -140,10 +153,55 @@ export function desenhar(svg, geo, { clique, hover, rotulo }) {
   };
   svg.onmouseover = e => { const p = e.target.closest('path'); if (p) hover(p.dataset.id); };
 
+  // ───────── fundo (ruas / relevo / satélite) ─────────
+  // Na projeção acima, o tile z/x/y ocupa exatamente: x = x·lado − 180, y = y·lado − 180, lado = 360/2^z.
+  const gT = document.createElementNS(NS, 'g');
+  gT.setAttribute('class', 'rg-tiles'); svg.prepend(gT);   // atrás dos polígonos
+  svg.dataset.base = 'limpo';
+  const tiles = new Map();
+  let fonte = null, precisa = new Set(), carregando = 0;
+  const varrer = () => {   // remove tiles que já não são necessários (só quando nada está carregando → sem piscar)
+    if (carregando > 0) return;
+    tiles.forEach((im, k) => { if (!precisa.has(k)) { im.remove(); tiles.delete(k); } });
+  };
+  function atualizarTiles(s, r) {
+    if (!fonte) return;
+    const z = Math.max(0, Math.min(fonte.max, Math.round(Math.log2(s * 360 / 256))));
+    const n = 2 ** z, lado = 360 / n;
+    const vw = r.width / s / 2, vh = r.height / s / 2, cx = view.x + view.w / 2, cy = view.y + view.h / 2;
+    const tx0 = Math.max(0, Math.floor((cx - vw + 180) / lado)), tx1 = Math.min(n - 1, Math.floor((cx + vw + 180) / lado));
+    const ty0 = Math.max(0, Math.floor((cy - vh + 180) / lado)), ty1 = Math.min(n - 1, Math.floor((cy + vh + 180) / lado));
+    if ((tx1 - tx0 + 1) * (ty1 - ty0 + 1) > 80) return;   // proteção contra pedir tiles demais
+    precisa = new Set();
+    for (let ty = ty0; ty <= ty1; ty++)
+      for (let tx = tx0; tx <= tx1; tx++) {
+        const k = `${fonte.id}/${z}/${tx}/${ty}`;
+        precisa.add(k);
+        if (tiles.has(k)) continue;
+        const im = document.createElementNS(NS, 'image');
+        im.setAttribute('href', fonte.url(z, tx, ty));
+        im.setAttribute('x', (tx * lado - 180).toFixed(6)); im.setAttribute('y', (ty * lado - 180).toFixed(6));
+        im.setAttribute('width', (lado * 1.004).toFixed(6)); im.setAttribute('height', (lado * 1.004).toFixed(6));   // leve sobreposição evita frestas
+        im.setAttribute('preserveAspectRatio', 'none');
+        carregando++;
+        const fim = () => { carregando = Math.max(0, carregando - 1); varrer(); };
+        im.addEventListener('load', fim, { once: true }); im.addEventListener('error', fim, { once: true });
+        gT.append(im); tiles.set(k, im);
+      }
+    varrer();
+  }
+  function camada(id) {
+    fonte = FONTES[id]?.url ? { id, ...FONTES[id] } : null;
+    svg.dataset.base = fonte ? id : 'limpo';
+    tiles.forEach(im => im.remove()); tiles.clear(); precisa = new Set(); carregando = 0;
+    agendar();
+  }
+
   // ───────── rótulos ─────────
   const textos = new Map();
   function rotular() {
     const s = svg.getScreenCTM()?.a, r = svg.getBoundingClientRect();
+    if (s && r.width) atualizarTiles(s, r);
     if (!s || !r.width || !rotulo) return;
     // região realmente visível (com a vista "meet" pode sobrar faixa nos lados)
     const vw = r.width / s / 2, vh = r.height / s / 2, cx = view.x + view.w / 2, cy = view.y + view.h / 2;
@@ -184,5 +242,5 @@ export function desenhar(svg, geo, { clique, hover, rotulo }) {
   svg._ro = new ResizeObserver(agendar); svg._ro.observe(svg);   // também faz o 1º desenho dos rótulos
   aplicar();
 
-  return { paths, rotular: agendar, zoom: f => ir(calc(f)), reset: () => ir({ ...base }), focar };
+  return { paths, rotular: agendar, zoom: f => ir(calc(f)), reset: () => ir({ ...base }), focar, camada };
 }

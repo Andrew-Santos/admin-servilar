@@ -1,9 +1,9 @@
-// modules/especialidades/module.js — tabela + modais (leitura, cadastro/edição)
+// modules/especialidades/module.js
 import * as data from './data.js';
-import { salvar, alterarStatus, remover, validar, maiusculo } from './actions.js';
-import { h, plural, avatar, linhaTabela, itemRegiao, chipUF, vazio, vazioTabela, detalheEsp } from './ui.js';
+import { salvar, remover, validar, maiusculo } from './actions.js';
+import { h, icone, plural, vazio, vazioTb, linhaTb, pill, corpoVer, itemRegiao, chipUF } from './ui.js';
 
-let vivo = false, limpar = () => {};
+let vivo = false, timer = 0, limpar = null;
 const norm = s => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 const porNome = (a, b) => a.nome.localeCompare(b.nome, 'pt');
 const porCidade = (a, b) => a.cidade.localeCompare(b.cidade, 'pt');
@@ -12,49 +12,73 @@ const porCidade = (a, b) => a.cidade.localeCompare(b.cidade, 'pt');
 const novoDraft = e => ({ nome: e?.nome ?? '', descricao: e?.descricao ?? '', status: e ? e.status : true, regioes: new Set(e?.regioes ?? []) });
 const plano = d => ({ nome: d.nome, descricao: d.descricao, status: d.status, regioes: [...d.regioes].sort((a, b) => a - b) });
 
+const FORM = `
+  <div class="es-fg">
+    <label class="es-lbl" for="es-nome">Nome</label>
+    <input id="es-nome" class="es-campo es-caps" maxlength="80" autocomplete="off" placeholder="EX.: ELETRICISTA">
+  </div>
+  <div class="es-fg">
+    <label class="es-lbl" for="es-desc">Descrição <small id="es-cnt">0/500</small></label>
+    <textarea id="es-desc" class="es-campo" rows="3" maxlength="500" placeholder="Opcional"></textarea>
+  </div>
+  <div class="es-fg es-linha">
+    <span class="es-lbl">Status</span>
+    <label class="es-sw"><input type="checkbox" id="es-status"><span class="es-trilho"></span><span id="es-st-t">Ativa</span></label>
+  </div>
+  <div class="es-sec"><span>Regiões atendidas</span><b id="es-rn">0</b></div>
+  <div class="es-ufs" id="es-ufs"></div>
+  <input id="es-rq" class="es-campo" type="search" maxlength="60" autocomplete="off" placeholder="Buscar cidade" aria-label="Buscar cidade">
+  <div class="es-rl-cab"><span id="es-uf-t"></span><span class="ac"><button type="button" id="es-todas">Marcar todas</button><button type="button" id="es-nenhuma">Limpar</button></span></div>
+  <ul class="es-rl" id="es-rl"></ul>
+  <p class="es-orf" id="es-orf" hidden><span id="es-orf-t"></span><button type="button" id="es-orf-b">Remover</button></p>`;
+
+const RODAPE = `
+  <p id="es-msg" role="status"></p>
+  <div class="es-acoes" id="es-acoes">
+    <button type="button" class="es-ex" id="es-excluir" hidden>Excluir</button>
+    <span class="es-esp"></span>
+    <button type="button" class="btn-borda" id="es-cancelar">Cancelar</button>
+    <button type="button" class="es-salvar" id="es-salvar" disabled>Salvar</button>
+  </div>
+  <div class="es-conf" id="es-conf" hidden>
+    <span id="es-conf-t"></span>
+    <button type="button" class="es-sim" id="es-sim">Excluir</button>
+    <button type="button" class="btn-borda" id="es-nao">Cancelar</button>
+  </div>`;
+
 export default {
   estilo: 'modules/especialidades/style.css',
-  desmontar() { vivo = false; limpar(); },
+  desmontar() { vivo = false; clearTimeout(timer); limpar?.(); limpar = null; },
 
   async montar({ conteudo, filtros, Auth }) {
-    vivo = true; data.iniciar(Auth);
-
+    limpar?.(); vivo = true; data.iniciar(Auth);
     conteudo.innerHTML = `
       <div class="es">
-        <header class="es-top">
-          <div>
-            <h1>Especialidades</h1>
-            <p>Os serviços oferecidos e as cidades onde cada um é atendido.</p>
-          </div>
-          <button type="button" class="es-novo" id="es-novo"><i class="ph ph-plus"></i> Cadastrar especialidade</button>
-        </header>
         <section class="es-main">
           <div class="es-bar">
-            <div class="es-seg" id="es-seg" role="group" aria-label="Filtrar por status">
-              <button type="button" data-v="">Todas <b id="es-st-all">0</b></button>
-              <button type="button" data-v="1">Ativas <b id="es-st-a">0</b></button>
-              <button type="button" data-v="0">Inativas <b id="es-st-i">0</b></button>
-            </div>
-            <span class="alerta" id="es-st-sbox" hidden><i class="ph ph-warning-circle"></i><span id="es-st-s">0</span>&nbsp;sem regiões</span>
-            <span class="es-res" id="es-n"></span>
+            <div class="es-tit"><h2>Especialidades</h2><b id="es-n">0</b><span class="es-sub"><span id="es-sub"></span><span class="w" id="es-sub-w"></span></span></div>
+            <button type="button" class="es-novo" id="es-novo"><i class="ph ph-plus"></i> Cadastrar especialidade</button>
           </div>
-          <div class="es-tw">
-            <table class="es-tabela">
-              <thead>
-                <tr>
-                  <th class="c-nome">Especialidade</th>
-                  <th class="c-desc">Descrição</th>
-                  <th class="c-reg">Regiões</th>
-                  <th class="c-st">Status</th>
-                  <th class="c-ac"><span class="sr">Ações</span></th>
-                </tr>
-              </thead>
+          <div class="es-tbw">
+            <table class="es-tb">
+              <colgroup><col class="c-nome"><col class="c-desc"><col class="c-reg"><col class="c-st"><col class="c-go"></colgroup>
+              <thead><tr><th>Especialidade</th><th>Descrição</th><th>Regiões</th><th>Status</th><th></th></tr></thead>
               <tbody id="es-lista"></tbody>
             </table>
           </div>
         </section>
+        <div class="es-ov" id="es-ov" hidden>
+          <div class="es-dlg" id="es-dlg" role="dialog" aria-modal="true" aria-labelledby="es-dt" tabindex="-1">
+            <header class="es-dh">
+              <h3 id="es-dt"></h3><span id="es-dp" class="es-pill" hidden></span><small class="es-sujo" id="es-sujo" hidden>● não salva</small>
+              <span class="es-dacoes" id="es-dacoes"></span>
+            </header>
+            <div class="es-db" id="es-db"></div>
+            <footer class="es-df" id="es-df"></footer>
+          </div>
+        </div>
+        <div class="es-toast" id="es-toast" role="status" aria-live="polite" hidden></div>
       </div>`;
-
     filtros.innerHTML = `
       <label class="es-lbl" for="es-q">Buscar</label>
       <input id="es-q" class="es-campo" type="search" maxlength="60" autocomplete="off" placeholder="Nome ou descrição">
@@ -63,97 +87,91 @@ export default {
       <label class="es-lbl" for="es-fu">Disponível em</label>
       <select id="es-fu" class="es-campo"><option value="">Todos os estados</option></select>`;
 
-    // Modal (fica no <body> para cobrir a tela toda; é removido ao sair do módulo)
-    const ov = h('div', { class: 'es-ov', hidden: true });
-    ov.innerHTML = `
-      <div class="es-md" role="dialog" aria-modal="true" aria-labelledby="es-mt">
-        <header class="es-mh">
-          <span id="es-avw"></span>
-          <div class="es-mh-t">
-            <div class="es-mh-l"><h2 id="es-mt"></h2><span class="es-sd" id="es-mp" hidden></span></div>
-            <p id="es-ms"></p>
-          </div>
-          <button type="button" class="es-x" id="es-x" aria-label="Fechar"><i class="ph ph-x"></i></button>
-        </header>
-        <div class="es-mb">
-          <div id="es-ler"></div>
-          <div id="es-form" hidden>
-            <div class="es-sec">
-              <span>Dados</span>
-              <label class="es-sw"><input type="checkbox" id="es-status" checked><span class="es-trilho"></span><span id="es-sw-t">Ativa</span></label>
-            </div>
-            <label class="es-lbl" for="es-nome">Nome</label>
-            <input id="es-nome" class="es-campo es-caps" maxlength="80" autocomplete="off" placeholder="EX.: ELETRICISTA">
-            <label class="es-lbl" for="es-desc">Descrição <small id="es-cnt">0/500</small></label>
-            <textarea id="es-desc" class="es-campo" rows="2" maxlength="500" placeholder="Opcional"></textarea>
-
-            <div class="es-sec"><span>Regiões atendidas</span><b id="es-rn">0</b></div>
-            <div class="es-ufs" id="es-ufs"></div>
-            <input id="es-rq" class="es-campo" type="search" maxlength="60" autocomplete="off" placeholder="Buscar cidade" aria-label="Buscar cidade">
-            <div class="es-rl-cab">
-              <span id="es-uf-t"></span>
-              <span class="ac"><button type="button" id="es-todas">Marcar todas</button><button type="button" id="es-nenhuma">Limpar</button></span>
-            </div>
-            <ul class="es-rl" id="es-rl"></ul>
-            <p class="es-orf" id="es-orf" hidden><span id="es-orf-t"></span><button type="button" id="es-orf-b">Remover</button></p>
-          </div>
-        </div>
-        <footer class="es-mf">
-          <p id="es-msg" role="status"></p>
-          <div class="es-acoes" id="es-acoes">
-            <button type="button" class="es-ex" id="es-excluir" hidden><i class="ph ph-trash"></i> Excluir</button>
-            <span class="es-esp"></span>
-            <button type="button" class="btn-borda" id="es-fechar">Fechar</button>
-            <button type="button" class="es-salvar" id="es-editar"><i class="ph ph-pencil-simple"></i> Editar</button>
-            <button type="button" class="btn-borda" id="es-cancelar" hidden>Cancelar</button>
-            <button type="button" class="es-salvar" id="es-salvar" hidden disabled>Salvar</button>
-          </div>
-          <div class="es-conf" id="es-conf" hidden>
-            <span id="es-conf-t"></span>
-            <button type="button" class="es-sim" id="es-sim">Excluir</button>
-            <button type="button" class="btn-borda" id="es-nao">Cancelar</button>
-          </div>
-        </footer>
-      </div>`;
-    const toastEl = h('div', { class: 'es-toast', role: 'status', 'aria-live': 'polite' });
-    document.body.append(ov, toastEl);
-
-    const $ = s => conteudo.querySelector(s) || filtros.querySelector(s) || ov.querySelector(s);
+    const $ = s => conteudo.querySelector(s) || filtros.querySelector(s);
     let esp = [], regs = [], porId = new Map(), ufsReg = new Map();   // ufsReg: sigla → cidades cadastradas
-    let sel = null, modo = null, draft = novoDraft(null), orig = plano(draft);   // modo: null | 'ler' | 'form'
-    let ufAtual = '', ocupado = false, confirmando = null, tt = 0;     // confirmando: null | 'excluir' | 'descartar'
+    let modo = null, sel = null;                  // modo: null | 'ver' | 'editar' | 'novo'; sel = id aberto
+    let draft = novoDraft(null), orig = plano(draft);
+    let ufAtual = '', ocupado = false, confirmando = null, aoDescartar = null, ultimoFoco = null;
 
-    const msg = t => { $('#es-msg').textContent = t; };
+    const msg = t => { const m = $('#es-msg'); if (m) m.textContent = t; };
     const txtErro = (e, padrao) => (e?.servidor ? e.message : padrao);
     const sujo = () => JSON.stringify(plano(draft)) !== JSON.stringify(orig);
+    const ehForm = () => modo === 'novo' || modo === 'editar';
     const ufDe = e => [...new Set(e.regioes.map(i => porId.get(i)?.uf).filter(Boolean))].sort();
-    const atual = () => esp.find(x => x.id === sel);
-
-    function toast(t, erro) {
-      toastEl.textContent = t; toastEl.classList.toggle('erro', !!erro); toastEl.classList.add('on');
-      clearTimeout(tt); tt = setTimeout(() => toastEl.classList.remove('on'), 3500);
+    const foco = s => $(s)?.focus();
+    function toast(t) {
+      const el = $('#es-toast'); el.textContent = t; el.hidden = false;
+      clearTimeout(timer); timer = setTimeout(() => { el.hidden = true; }, 3200);
     }
 
     // ── Tabela (com os filtros do painel) ──
-    function renderLista() {
+    function renderTabela() {
       const q = norm($('#es-q').value.trim()), fs = $('#es-fs').value, fu = $('#es-fu').value;
       const lista = esp.filter(e =>
         (!q || norm(e.nome).includes(q) || norm(e.descricao).includes(q)) &&
         (!fs || (fs === '1') === e.status) &&
         (!fu || ufDe(e).includes(fu)));
-      $('#es-n').textContent = lista.length === esp.length ? '' : plural(lista.length, 'resultado', 'resultados');
+      $('#es-n').textContent = lista.length === esp.length ? esp.length : `${lista.length}/${esp.length}`;
       const ativas = esp.filter(e => e.status).length, sem = esp.filter(e => !e.regioes.length).length;
-      $('#es-st-all').textContent = esp.length; $('#es-st-a').textContent = ativas; $('#es-st-i').textContent = esp.length - ativas;
-      $('#es-st-s').textContent = sem; $('#es-st-sbox').hidden = !sem;
-      $('#es-seg').querySelectorAll('button').forEach(x => { const on = x.dataset.v === fs; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+      $('#es-sub').textContent = `${plural(ativas, 'ativa', 'ativas')} · ${plural(esp.length - ativas, 'inativa', 'inativas')}`;
+      $('#es-sub-w').textContent = sem ? ` · ${plural(sem, 'sem região', 'sem regiões')}` : '';
       $('#es-lista').replaceChildren(...(lista.length
-        ? lista.map(e => linhaTabela(e, { ufs: ufDe(e), onVer: () => abrirLer(e), onEditar: () => abrirForm(e), onStatus: () => trocarStatus(e) }))
-        : [vazioTabela(
-            h('i', { class: 'ph ph-magnifying-glass' }),
-            h('span', { text: esp.length ? 'Nenhuma especialidade com esses filtros.' : 'Nenhuma especialidade cadastrada ainda.' }))]));
+        ? lista.map(e => linhaTb(e, { ufs: ufDe(e), onAbrir: ev => { ultimoFoco = ev.currentTarget.querySelector('button'); abrirVer(e); } }))
+        : [vazioTb(esp.length ? 'Nenhuma especialidade com esses filtros.' : 'Nenhuma especialidade cadastrada ainda.')]));
     }
 
-    // ── Seletor de regiões: um estado por vez, só cidades cadastradas em "Regiões" ──
+    // ── Modal ──
+    function mostrar() { $('#es-ov').hidden = false; conteudo.classList.add('es-modal'); }
+    function fecharModal() {
+      modo = null; sel = null; confirmando = null; aoDescartar = null;
+      $('#es-ov').hidden = true; conteudo.classList.remove('es-modal');
+      if (ultimoFoco?.isConnected) ultimoFoco.focus();
+    }
+    function tentarFechar() {                       // X, Esc e clique fora
+      if (ocupado || !modo) return;
+      if (!ehForm() || !sujo()) return fecharModal();
+      pedirDescarte(fecharModal);
+    }
+    function pedirDescarte(depois) { confirmando = 'descartar'; aoDescartar = depois; estado(); foco('#es-sim'); }
+    function cancelarForm() {                       // botão Cancelar: volta para a visualização (ou fecha, se era cadastro novo)
+      const voltar = () => { const e = esp.find(x => x.id === sel); e ? abrirVer(e) : fecharModal(); };
+      if (!sujo()) return voltar();
+      pedirDescarte(voltar);
+    }
+
+    function abrirVer(e) {
+      sel = e.id; modo = 'ver'; confirmando = null; renderModal(); mostrar(); foco('#es-editar');
+    }
+    function abrirForm(e) {                         // e = especialidade a editar; null = cadastro novo
+      sel = e ? e.id : null; modo = e ? 'editar' : 'novo'; draft = novoDraft(e); orig = plano(draft); confirmando = null;
+      mostrar(); renderModal();   // mostra ANTES: focus() não funciona em elemento escondido
+    }
+
+    function renderModal() {
+      const e = esp.find(x => x.id === sel) ?? null;
+      const fechar = h('button', { type: 'button', class: 'es-ib', title: 'Fechar', 'aria-label': 'Fechar', onclick: tentarFechar }, icone('x'));
+      const dp = $('#es-dp');
+      $('#es-sujo').hidden = true;
+      if (modo === 'ver') {
+        $('#es-dt').textContent = e.nome;
+        dp.hidden = false; dp.className = 'es-pill ' + (e.status ? 'on' : 'off'); dp.textContent = e.status ? 'Ativa' : 'Inativa';
+        $('#es-dacoes').replaceChildren(
+          h('button', { type: 'button', class: 'es-ib', id: 'es-editar', title: 'Editar', 'aria-label': 'Editar ' + e.nome, onclick: () => abrirForm(e) }, icone('pencil-simple')),
+          fechar);
+        $('#es-db').replaceChildren(corpoVer(e, porId));
+        $('#es-df').replaceChildren(h('div', { class: 'es-acoes' }, h('span', { class: 'es-esp' }, ),
+          h('button', { type: 'button', class: 'btn-borda', text: 'Fechar', onclick: fecharModal })));
+        $('#es-db').scrollTop = 0;
+      } else {
+        $('#es-dt').textContent = modo === 'novo' ? 'Cadastrar especialidade' : 'Editar especialidade';
+        dp.hidden = true;
+        $('#es-dacoes').replaceChildren(fechar);
+        $('#es-db').innerHTML = FORM; $('#es-df').innerHTML = RODAPE;
+        ligarForm();
+      }
+    }
+
+    // ── Formulário ──
     const visiveis = q => (ufsReg.get(ufAtual) || [])
       .filter(r => (r.ativo !== false || draft.regioes.has(r.ibge_id)) && (!q || norm(r.cidade).includes(q)))
       .sort(porCidade);
@@ -168,8 +186,7 @@ export default {
         : [vazio(q ? 'Nenhuma cidade encontrada.' : 'Sem cidades ativas neste estado.')]));
     }
 
-    // contador, resumo por estado e aviso de códigos que não existem mais em Regiões
-    function resumo() {
+    function resumo() {   // contador, abas de estado e aviso de códigos que não existem mais em Regiões
       const por = new Map(); let orfas = 0;
       draft.regioes.forEach(i => { const u = porId.get(i)?.uf; u ? por.set(u, (por.get(u) || 0) + 1) : orfas++; });
       $('#es-rn').textContent = draft.regioes.size;
@@ -179,79 +196,52 @@ export default {
       if (orfas) $('#es-orf-t').textContent = `${plural(orfas, 'código não existe', 'códigos não existem')} mais em Regiões.`;
     }
 
-    // tudo que depende do modo (leitura/formulário), do rascunho e da confirmação
     function estado() {
-      if (!modo) return;
-      const form = modo === 'form', s = form && sujo(), e = atual();
-      $('#es-ler').hidden = form; $('#es-form').hidden = !form;
-      $('#es-fechar').hidden = $('#es-editar').hidden = form;
-      $('#es-cancelar').hidden = $('#es-salvar').hidden = !form;
-      $('#es-excluir').hidden = !form || sel == null;
-      $('#es-excluir').disabled = ocupado;
+      if (!ehForm()) return;
+      const s = sujo(), c = confirmando;
       $('#es-salvar').disabled = ocupado || !s;
       $('#es-cancelar').disabled = ocupado;
-      $('#es-acoes').hidden = !!confirmando; $('#es-conf').hidden = !confirmando;
-      $('#es-mt').textContent = form ? (sel == null ? 'Cadastrar especialidade' : 'Editar especialidade') : (e?.nome ?? '');
-      const novo = form && sel == null;
-      $('#es-avw').replaceChildren(avatar(novo ? 'Novo' : (e?.nome ?? ''), novo ? 'plus' : null));
-      const pill = $('#es-mp');
-      pill.hidden = form || !e;
-      if (!pill.hidden) { pill.className = 'es-sd ' + (e.status ? 'on' : 'off'); pill.textContent = e.status ? 'Ativa' : 'Inativa'; }
-      $('#es-ms').textContent = form
-        ? (s ? '● Alterações não salvas' : 'Preencha os dados e escolha as regiões atendidas.')
-        : (e ? `${plural(e.regioes.length, 'cidade', 'cidades')} em ${plural(ufDe(e).length, 'estado', 'estados')}` : '');
-      $('#es-ms').classList.toggle('sujo', s);
-      if (confirmando) {
-        const ex = confirmando === 'excluir';
-        $('#es-conf-t').textContent = ex ? `Excluir ${e?.nome ?? ''}?` : 'Descartar as alterações?';
-        $('#es-sim').textContent = ex ? 'Excluir' : 'Descartar';
-        $('#es-nao').textContent = ex ? 'Cancelar' : 'Continuar editando';
+      $('#es-sujo').hidden = !s;
+      $('#es-excluir').hidden = modo !== 'editar';
+      $('#es-st-t').textContent = draft.status ? 'Ativa' : 'Inativa';
+      $('#es-cnt').textContent = `${draft.descricao.length}/500`;
+      $('#es-acoes').hidden = !!c; $('#es-conf').hidden = !c;
+      if (c) {
+        $('#es-conf-t').textContent = c === 'excluir' ? `Excluir ${draft.nome}?` : 'Descartar as alterações?';
+        $('#es-sim').textContent = c === 'excluir' ? 'Excluir' : 'Descartar';
+        $('#es-nao').textContent = c === 'excluir' ? 'Cancelar' : 'Continuar editando';
       }
-      if (form) {
-        $('#es-sw-t').textContent = draft.status ? 'Ativa' : 'Inativa';
-        $('#es-cnt').textContent = `${draft.descricao.length}/500`;
-        resumo();
-      }
+      resumo();
     }
 
-    const mostrar = () => { ov.hidden = false; document.body.style.overflow = 'hidden'; ov.querySelector('.es-mb').scrollTop = 0; };
-
-    // Modal de leitura
-    function abrirLer(e) {
-      sel = e.id; modo = 'ler'; confirmando = null; msg('');
-      $('#es-ler').replaceChildren(detalheEsp(e, porId));
-      estado(); mostrar();
-      $('#es-editar').focus();
-    }
-
-    // Modal de cadastro (null) ou edição
-    function abrirForm(e) {
-      sel = e ? e.id : null; draft = novoDraft(e); orig = plano(draft); modo = 'form'; confirmando = null; msg('');
+    function ligarForm() {
       $('#es-nome').value = draft.nome; $('#es-desc').value = draft.descricao; $('#es-status').checked = draft.status;
       const uf = [...draft.regioes].map(i => porId.get(i)?.uf).find(Boolean);
       if (uf) ufAtual = uf;
-      $('#es-rq').value = '';
-      renderRegioes(); estado(); mostrar();
-      const on = $('#es-ufs .on'); if (on) $('#es-ufs').scrollLeft = Math.max(0, on.offsetLeft - 48);
-      $('#es-nome').focus();
-    }
 
-    function fechar(forcar) {
-      if (ocupado || !modo) return;
-      if (!forcar && modo === 'form' && sujo()) { confirmando = 'descartar'; return estado(); }
-      ov.hidden = true; document.body.style.overflow = ''; modo = null; sel = null; confirmando = null; msg('');
-    }
+      $('#es-nome').oninput = ev => {
+        const el = ev.target, a = el.selectionStart, b = el.selectionEnd, v = maiusculo(el.value);
+        if (v !== el.value) { el.value = v; try { el.setSelectionRange(a, b); } catch (_) {} }   // caixa alta sem pular o cursor
+        draft.nome = el.value; estado();
+      };
+      $('#es-nome').onkeydown = ev => { if (ev.key === 'Enter' && !$('#es-salvar').disabled) salvarForm(); };
+      $('#es-desc').oninput = ev => { draft.descricao = ev.target.value; estado(); };
+      $('#es-status').onchange = ev => { draft.status = ev.target.checked; estado(); };
+      $('#es-rq').oninput = () => renderRegioes();
+      $('#es-rq').disabled = $('#es-todas').disabled = $('#es-nenhuma').disabled = !ufsReg.size;
+      $('#es-todas').onclick = () => { visiveis(norm($('#es-rq').value.trim())).forEach(r => draft.regioes.add(r.ibge_id)); renderRegioes(); estado(); };
+      $('#es-nenhuma').onclick = () => { visiveis(norm($('#es-rq').value.trim())).forEach(r => draft.regioes.delete(r.ibge_id)); renderRegioes(); estado(); };
+      $('#es-orf-b').onclick = () => { [...draft.regioes].filter(i => !porId.has(i)).forEach(i => draft.regioes.delete(i)); estado(); };
 
-    // ── Ações ──
-    async function trocarStatus(e) {
-      if (ocupado) return; ocupado = true;
-      const novo = !e.status;
-      try {
-        await alterarStatus(e.id, novo);
-        e.status = novo;
-        toast(`${e.nome} ${novo ? 'ativada' : 'desativada'}.`);
-      } catch (err) { console.error(err); toast(txtErro(err, 'Não foi possível alterar. Tente novamente.'), true); }
-      ocupado = false; renderLista();
+      $('#es-salvar').onclick = salvarForm;
+      $('#es-cancelar').onclick = cancelarForm;
+      $('#es-excluir').onclick = () => { confirmando = 'excluir'; estado(); foco('#es-sim'); };
+      $('#es-nao').onclick = () => { confirmando = null; estado(); foco(modo === 'editar' ? '#es-excluir' : '#es-cancelar'); };
+      $('#es-sim').onclick = () => (confirmando === 'excluir' ? excluirForm() : aoDescartar?.());
+
+      renderRegioes(); estado();
+      const on = $('#es-ufs .on'); if (on) $('#es-ufs').scrollLeft = Math.max(0, on.offsetLeft - 48);   // deixa o estado atual à vista
+      foco('#es-nome');
     }
 
     async function salvarForm() {
@@ -263,8 +253,9 @@ export default {
         const r = await salvar(sel, draft);
         esp = nova ? [...esp, r] : esp.map(x => x.id === r.id ? r : x);
         esp.sort(porNome);
-        ocupado = false; fechar(true); renderLista();
-        toast(nova ? `${r.nome} cadastrada.` : `${r.nome} atualizada.`);
+        ocupado = false; renderTabela();
+        if (nova) fecharModal(); else abrirVer(r);
+        toast(nova ? 'Especialidade cadastrada.' : 'Alterações salvas.');
       } catch (err) {
         console.error(err); ocupado = false; estado();
         msg(txtErro(err, 'Não foi possível salvar. Tente novamente.'));
@@ -272,12 +263,12 @@ export default {
     }
 
     async function excluirForm() {
-      const e = atual(); if (!e) return;
+      const e = esp.find(x => x.id === sel); if (!e) return;
       ocupado = true; msg('Excluindo…'); estado();
       try {
         await remover(e.id);
         esp = esp.filter(x => x.id !== e.id);
-        ocupado = false; fechar(true); renderLista();
+        ocupado = false; renderTabela(); fecharModal();
         toast(`${e.nome} excluída.`);
       } catch (err) {
         console.error(err); ocupado = false; confirmando = null; estado();
@@ -285,43 +276,23 @@ export default {
       }
     }
 
-    // ── Eventos ──
-    $('#es-q').oninput = $('#es-fs').oninput = $('#es-fu').oninput = () => renderLista();
-    $('#es-novo').onclick = () => abrirForm(null);
-    $('#es-seg').onclick = ev => { const x = ev.target.closest('button'); if (x) { $('#es-fs').value = x.dataset.v; renderLista(); } };
-
-    $('#es-x').onclick = $('#es-fechar').onclick = $('#es-cancelar').onclick = () => fechar();
-    ov.onmousedown = ev => { if (ev.target === ov) fechar(); };
-    $('#es-editar').onclick = () => { const e = atual(); if (e) abrirForm(e); };
-    const tecla = ev => {
-      if (ev.key !== 'Escape' || ov.hidden) return;
-      if (confirmando) { confirmando = null; estado(); } else fechar();
+    // ── Eventos gerais ──
+    $('#es-q').oninput = $('#es-fs').oninput = $('#es-fu').oninput = () => renderTabela();
+    $('#es-novo').onclick = () => { ultimoFoco = $('#es-novo'); abrirForm(null); };
+    $('#es-ov').onmousedown = ev => { if (ev.target === $('#es-ov')) tentarFechar(); };
+    const teclas = ev => {
+      if (!modo) return;
+      if (ev.key === 'Escape') { ev.preventDefault(); return tentarFechar(); }
+      if (ev.key !== 'Tab') return;
+      const dlg = $('#es-dlg'), a = document.activeElement;
+      const foc = [...dlg.querySelectorAll('button,input,select,textarea,a[href]')].filter(el => !el.disabled && !el.closest('[hidden]'));
+      if (!foc.length) return;
+      if (!dlg.contains(a)) { ev.preventDefault(); foc[0].focus(); }
+      else if (ev.shiftKey && a === foc[0]) { ev.preventDefault(); foc.at(-1).focus(); }
+      else if (!ev.shiftKey && a === foc.at(-1)) { ev.preventDefault(); foc[0].focus(); }
     };
-    document.addEventListener('keydown', tecla);
-
-    $('#es-nome').oninput = ev => {
-      const el = ev.target, a = el.selectionStart, b = el.selectionEnd, v = maiusculo(el.value);
-      if (v !== el.value) { el.value = v; try { el.setSelectionRange(a, b); } catch (_) {} }   // caixa alta sem pular o cursor
-      draft.nome = el.value; estado();
-    };
-    $('#es-nome').onkeydown = ev => { if (ev.key === 'Enter' && !$('#es-salvar').disabled) salvarForm(); };
-    $('#es-desc').oninput = ev => { draft.descricao = ev.target.value; estado(); };
-    $('#es-status').onchange = ev => { draft.status = ev.target.checked; estado(); };
-
-    $('#es-rq').oninput = () => renderRegioes();
-    $('#es-todas').onclick = () => { visiveis(norm($('#es-rq').value.trim())).forEach(r => draft.regioes.add(r.ibge_id)); renderRegioes(); estado(); };
-    $('#es-nenhuma').onclick = () => { visiveis(norm($('#es-rq').value.trim())).forEach(r => draft.regioes.delete(r.ibge_id)); renderRegioes(); estado(); };
-    $('#es-orf-b').onclick = () => { [...draft.regioes].filter(i => !porId.has(i)).forEach(i => draft.regioes.delete(i)); estado(); };
-
-    $('#es-salvar').onclick = salvarForm;
-    $('#es-excluir').onclick = () => { confirmando = 'excluir'; estado(); };
-    $('#es-nao').onclick = () => { confirmando = null; estado(); };
-    $('#es-sim').onclick = () => (confirmando === 'excluir' ? excluirForm() : fechar(true));
-
-    limpar = () => {
-      document.removeEventListener('keydown', tecla);
-      clearTimeout(tt); ov.remove(); toastEl.remove(); document.body.style.overflow = '';
-    };
+    document.addEventListener('keydown', teclas);
+    limpar = () => document.removeEventListener('keydown', teclas);
 
     // ── Carga inicial ──
     function aplicarDados(d) {
@@ -332,18 +303,15 @@ export default {
       regs.forEach(r => { if (!ufsReg.has(r.uf)) ufsReg.set(r.uf, []); ufsReg.get(r.uf).push(r); });
       const ufs = [...ufsReg.keys()].sort();
       $('#es-fu').replaceChildren(h('option', { value: '', text: 'Todos os estados' }), ...ufs.map(u => h('option', { value: u, text: u })));
-      $('#es-rq').disabled = $('#es-todas').disabled = $('#es-nenhuma').disabled = !ufs.length;
       ufAtual = ufs[0] || '';
-      renderLista();
+      renderTabela();
     }
     const carregar = async () => {
-      $('#es-lista').replaceChildren(vazioTabela(h('span', { text: 'Carregando…' })));
+      $('#es-lista').replaceChildren(vazioTb('Carregando…'));
       try { const d = await data.carregar(); if (vivo) aplicarDados(d); }
       catch (e) {
         console.error(e);
-        if (vivo) $('#es-lista').replaceChildren(vazioTabela(
-          h('span', { text: 'Não foi possível carregar.' }),
-          h('button', { type: 'button', class: 'btn-borda', text: 'Tentar novamente', onclick: carregar })));
+        if (vivo) $('#es-lista').replaceChildren(vazioTb('Não foi possível carregar.', h('button', { type: 'button', class: 'btn-borda', text: 'Tentar novamente', onclick: carregar })));
       }
     };
     await carregar();

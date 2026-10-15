@@ -6,10 +6,10 @@ export const MENU = [
   { grupo: 'Cadastros', itens: [
     { id: 'especialidades', titulo: 'Especialidades',    icone: 'wrench' },
     { id: 'servicos',       titulo: 'Serviços',          icone: 'toolbox' },
+        { id: 'regioes',        titulo: 'Regiões',           icone: 'map-pin' },
+
     { id: 'profissionais',  titulo: 'Profissionais',     icone: 'hard-hat' },
     { id: 'clientes',       titulo: 'Clientes',          icone: 'users' },
-    { id: 'regioes',        titulo: 'Regiões',           icone: 'map-pin' },
-    { id: 'precos',         titulo: 'Preços por região', icone: 'currency-circle-dollar' },
   ]},
 ];
 
