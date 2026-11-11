@@ -1,4 +1,5 @@
 // modules/profissionais/module.js — tabela + mapa; clicar num profissional abre a ficha em janela redimensionável
+
 import * as data from './data.js';
 import { ordenar, rotuloCidade } from './actions.js';
 import { abrirFicha } from './module-ficha.js';
