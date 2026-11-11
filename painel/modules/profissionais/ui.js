@@ -1,4 +1,4 @@
-// modules/profissionais/ui.js — peças de tela. Tudo via textContent (nunca innerHTML com dados).
+// modules/profissionais/ui.js — peças de tela. Dado externo entra só por textContent (nunca innerHTML).
 
 // h('div', { class:'x', onclick: fn, text:'oi' }, filho1, filho2)
 export const h = (tag, props = {}, ...filhos) => {
@@ -14,6 +14,9 @@ export const h = (tag, props = {}, ...filhos) => {
   return e;
 };
 export const icone = nome => h('i', { class: `ph ph-${nome}`, 'aria-hidden': 'true' });
+
+// Troca o conteúdo de um elemento. Ignora null/false: replaceChildren(null) escreveria a palavra "null" na tela.
+export const trocar = (el, ...filhos) => el.replaceChildren(...filhos.flat().filter(f => f != null && f !== false));
 
 // Selo de situação: selo({ texto, cor })
 export const selo = s => h('span', { class: 'pf-selo ' + (s.cor || ''), text: s.texto });

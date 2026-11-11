@@ -1,0 +1,33 @@
+/* modules/profissionais/style-tabela.css — tabela e mapa geral */
+.pf-tabela-caixa{flex:1;min-height:0;overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+.pf-tabela{width:100%;border-collapse:collapse}
+.pf-tabela th{position:sticky;top:0;z-index:1;padding:0 16px;height:42px;text-align:left;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);background:#FAFBFB;border-bottom:1px solid var(--border);white-space:nowrap}
+.pf-th{display:inline-flex;align-items:center;gap:4px;padding:0;font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;background:none;border:none;cursor:pointer}
+.pf-th:hover,.pf-th.ativo{color:var(--teal-dark)}
+.pf-tabela td{padding:11px 16px;border-bottom:1px solid var(--border);vertical-align:middle}
+.pf-linha-tab{cursor:pointer}
+.pf-linha-tab:hover{background:rgba(47,156,149,.06)}
+.pf-linha-tab:last-child td{border-bottom:none}
+.pf-linha-tab.bloq .pf-nome-btn{color:var(--text-3);text-decoration:line-through}
+.pf-nome-btn{padding:0;font:inherit;font-weight:600;text-align:left;color:var(--text-1);background:none;border:none;cursor:pointer}
+.pf-cpf{color:var(--text-3);white-space:nowrap}
+.pf-aval{font-size:12px;font-weight:600;color:#B85A1F}
+.pf-reprov{font-size:12px;font-weight:600;color:#9B2C2C}
+.pf-nada{color:var(--text-3)}
+.pf-vazio-tab{padding:40px 16px;text-align:center;color:var(--text-3);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+
+/* ── mapa ── */
+.pf-mapa{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+.pf-mapa-topo{flex:none;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pf-cidades{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.pf-cidades-tit{font-size:12px;font-weight:600;color:var(--text-2)}
+.pf-chip{height:26px;padding:0 10px;font-size:12px;font-weight:500;color:var(--teal-dark);background:var(--teal-soft);border:none;border-radius:99px;cursor:pointer}
+.pf-chip:hover{background:#D3EBE9}
+.pf-mapa-aviso{margin-left:auto;font-size:12px;color:var(--text-3)}
+.pf-mapa-caixa{flex:1;min-height:320px;overflow:hidden;background:#E9EFEF;border:1px solid var(--border);border-radius:var(--radius-lg)}
+.pf-mapa-caixa .pf-info{padding:16px}
+.pf-legenda{flex:none;display:flex;gap:14px;flex-wrap:wrap;list-style:none;font-size:12px;color:var(--text-2)}
+.pf-legenda li{display:flex;align-items:center;gap:6px}
+.pf-ponto{width:10px;height:10px;border-radius:50%}
+.pf-pop{display:grid;gap:6px;justify-items:start;font-family:var(--font);font-size:13px}
+.pf-pop span{color:var(--text-3)}
