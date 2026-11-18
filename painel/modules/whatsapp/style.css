@@ -1,0 +1,39 @@
+/* modules/whatsapp/style.css — base do módulo (prefixo wa-). Carregado ao abrir o módulo e removido ao sair. */
+@import './style-lista.css';
+@import './style-conversa.css';
+@import './style-midia.css';
+
+.ct-body.mod-whatsapp{display:flex;flex-direction:column;overflow:hidden}
+.wa{flex:1;min-height:0;display:flex;flex-direction:column;gap:14px}
+
+.wa-campo{width:100%;height:36px;padding:0 10px;font:inherit;color:var(--text-1);background:#fff;border:1.5px solid var(--border);border-radius:var(--radius)}
+.wa-campo:focus{border-color:var(--teal);outline:none}
+.wa-fl{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.wa-fl label{font-size:12px;font-weight:600;color:var(--text-2)}
+
+.wa-btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;font-size:13px;font-weight:500;color:var(--text-1);text-decoration:none;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);cursor:pointer}
+.wa-btn:hover{border-color:var(--teal);color:var(--teal-dark)}
+.wa-btn:disabled{opacity:.55;cursor:default}
+.wa-info{font-size:12px;color:var(--text-3)}
+.wa-msg{margin:12px;padding:8px 12px;font-size:12px;line-height:1.45;color:var(--text-2);background:var(--bg);border-radius:var(--radius)}
+.wa-msg.neg{color:#9B2C2C;background:#FDECEC}
+
+/* ── barra: título, contador, aviso e atualizar ── */
+.wa-bar{flex:none;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.wa-bar h2{font-family:var(--font-title);font-size:15px;font-weight:600}
+.wa-bar b{min-width:22px;padding:2px 7px;font-size:11px;font-weight:600;text-align:center;color:var(--teal-dark);background:var(--teal-soft);border-radius:10px}
+.wa-sub{font-size:12px;font-weight:600;color:#B85A1F}
+.wa-bar .wa-btn{margin-left:auto}
+
+/* ── painel de duas colunas ── */
+.wa-painel{flex:1;min-height:0;display:grid;grid-template-columns:minmax(260px,340px) minmax(0,1fr);overflow:hidden;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+
+.wa-avatar{width:40px;height:40px;flex:none;display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-title);font-size:13px;font-weight:600;color:var(--teal-dark);background:var(--teal-soft);border-radius:50%}
+.wa-avatar i{font-size:20px}
+
+@media (max-width:900px){
+  .wa-painel{grid-template-columns:minmax(0,1fr)}
+  .wa-conv{display:none}
+  .wa-painel.com-conversa .wa-lista{display:none}
+  .wa-painel.com-conversa .wa-conv{display:flex}
+}

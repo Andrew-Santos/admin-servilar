@@ -3,6 +3,7 @@ import * as data from './data.js';
 import { ordenar, rotuloCidade } from './actions.js';
 import { abrirFicha } from './module-ficha.js';
 import { criarMapa } from './ui-mapa.js';
+import { resumo } from './ui-resumo.js';
 import { tabela } from './ui-tabela.js';
 import { h, icone, msg, trocar } from './ui.js';
 
@@ -24,7 +25,7 @@ export default {
     filtros.innerHTML = `
       <div class="pf-fl"><label for="pf-q">Buscar por nome</label><input id="pf-q" class="pf-campo" type="search" maxlength="60" autocomplete="off" placeholder="Nome do profissional"></div>
       <div class="pf-fl"><label for="pf-st">Situação do cadastro</label>
-        <select id="pf-st" class="pf-campo"><option value="">Todas</option><option value="em_analise">Em análise</option><option value="ajustes_necessarios">Ajustes necessários</option><option value="ativo">Ativo</option><option value="bloqueado">Bloqueado</option></select></div>
+        <select id="pf-st" class="pf-campo"><option value="">Todas, menos em aberto</option><option value="pendente">Em aberto (não enviados)</option><option value="em_analise">Em análise</option><option value="ajustes_necessarios">Ajustes necessários</option><option value="ativo">Ativo</option><option value="bloqueado">Bloqueado</option></select></div>
       <div class="pf-fl"><label for="pf-ci">Cidade</label><select id="pf-ci" class="pf-campo"><option value="">Todas</option></select></div>`;
     const busca = filtros.querySelector('#pf-q'), situacao = filtros.querySelector('#pf-st'), cidade = filtros.querySelector('#pf-ci');
 
@@ -33,23 +34,24 @@ export default {
     const abaTabela = h('button', { type: 'button', role: 'tab', class: 'pf-aba' }, icone('table'), ' Tabela');
     const abaMapa = h('button', { type: 'button', role: 'tab', class: 'pf-aba' }, icone('map-trifold'), ' Mapa');
     const barra = h('div', { class: 'pf-bar' }, h('h2', { text: 'Profissionais' }), contador, sub, h('div', { class: 'pf-abas', role: 'tablist' }, abaTabela, abaMapa));
-    const painel = h('div', { class: 'pf-painel' });
-    trocar(conteudo, h('div', { class: 'pf' }, barra, painel));
+    const faixa = h('div', { class: 'pf-faixa' }), painel = h('div', { class: 'pf-painel' });
+    trocar(conteudo, h('div', { class: 'pf' }, barra, faixa, painel));
 
     mapa = criarMapa({ aoAbrir: id => abrir(id) });
-    let itens = [], aba = 'tabela', ordem = { col: 'situacao', dir: 'asc' };
+    let itens = [], truncado = false, aba = 'tabela', ordem = { col: 'situacao', dir: 'asc' };
 
     const abrir = id => abrirFicha({ id, nome: itens.find(i => i.id === id)?.nome || 'Profissional', aoMudar: recarregar });
 
     function visiveis() {
       const q = norm(busca.value.trim()), st = situacao.value, ci = cidade.value;
-      return itens.filter(i => (!st || i.status === st) && (!ci || rotuloCidade(i) === ci) && (!q || norm(i.nome).includes(q)));
+      return itens.filter(i => (st ? i.status === st : i.status !== 'pendente') && (!ci || rotuloCidade(i) === ci) && (!q || norm(i.nome).includes(q)));
     }
 
     function desenhar() {
       const vis = visiveis(), aval = itens.reduce((n, i) => n + i.para_avaliar, 0);
       contador.textContent = String(vis.length);
-      sub.textContent = aval ? `${aval} etapa${aval > 1 ? 's' : ''} para avaliar` : '';
+      sub.textContent = [aval ? `${aval} etapa${aval > 1 ? 's' : ''} para avaliar` : '', truncado ? 'Lista limitada aos primeiros 1000 cadastros' : ''].filter(Boolean).join(' · ');
+      trocar(faixa, itens.length ? resumo({ itens, atual: situacao.value, aoFiltrar: st => { situacao.value = st; desenhar(); } }) : null);
       [[abaTabela, 'tabela'], [abaMapa, 'mapa']].forEach(([b, id]) => { b.classList.toggle('ativa', aba === id); b.setAttribute('aria-selected', aba === id); });
 
       if (aba === 'tabela') {
@@ -60,7 +62,7 @@ export default {
         }));
       } else {
         if (!painel.contains(mapa.raiz)) trocar(painel, mapa.raiz);
-        mapa.atualizar(vis);
+        mapa.atualizar(vis.filter(i => i.status !== 'pendente')); // cadastro em aberto não vai para o mapa
       }
     }
 
@@ -73,7 +75,7 @@ export default {
     }
 
     async function recarregar() {
-      try { itens = await data.listar(); }
+      try { const d = await data.listar(); itens = d.itens; truncado = d.truncado; }
       catch (e) { if (vivo) trocar(painel, msg(e.message, 'neg'), h('button', { type: 'button', class: 'pf-btn', text: 'Tentar de novo', onclick: recarregar })); return; }
       if (!vivo) return;
       opcoesCidade(); desenhar();

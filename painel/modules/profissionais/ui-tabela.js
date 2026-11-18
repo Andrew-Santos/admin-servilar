@@ -1,5 +1,5 @@
 // modules/profissionais/ui-tabela.js — tabela de profissionais (clicar na linha abre a ficha)
-import { SITUACAO_CADASTRO, rotuloCidade } from './actions.js';
+import { NOME_ETAPA, SITUACAO_CADASTRO, diasDesde, rotuloCidade, textoDias } from './actions.js';
 import { h, icone, selo } from './ui.js';
 
 const COLUNAS = [
@@ -10,7 +10,11 @@ const COLUNAS = [
   { id: 'pendencias', titulo: 'Pendências', ordena: true },
 ];
 
-const pendencia = i => i.para_avaliar ? h('small', { class: 'pf-aval', text: `${i.para_avaliar} para avaliar` })
+const aberto = i => h('small', { class: 'pf-aberto', title: `${i.feitas ?? 0} de 6 etapas preenchidas`,
+  text: [i.parou_em ? `Parou em ${NOME_ETAPA[i.parou_em]}` : 'Tudo preenchido, falta enviar', textoDias(diasDesde(i.atualizado_em))].filter(Boolean).join(' · ') });
+
+const pendencia = i => i.status === 'pendente' ? aberto(i)
+  : i.para_avaliar ? h('small', { class: 'pf-aval', text: `${i.para_avaliar} para avaliar` })
   : i.reprovadas ? h('small', { class: 'pf-reprov', text: `${i.reprovadas} reprovada${i.reprovadas > 1 ? 's' : ''}` })
   : h('small', { class: 'pf-nada', text: '—' });
 

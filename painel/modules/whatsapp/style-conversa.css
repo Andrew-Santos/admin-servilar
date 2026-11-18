@@ -1,0 +1,54 @@
+/* modules/whatsapp/style-conversa.css — cabeçalho, fio de mensagens e bolhas */
+.wa-conv{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--bg)}
+.wa-conv-vazio{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px;font-size:13px;color:var(--text-3);text-align:center}
+.wa-conv-vazio i{font-size:44px}
+
+.wa-conv-cab{flex:none;display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border)}
+.wa-voltar{display:none;color:var(--text-2)}
+.wa-voltar:hover{background:var(--teal-soft)}
+.wa-conv-id{flex:1;min-width:0;display:grid}
+.wa-conv-id strong{font-family:var(--font-title);font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wa-conv-id span{font-size:12px;color:var(--text-3)}
+.wa-conv-n{flex:none;font-size:12px;color:var(--text-3)}
+@media (max-width:900px){.wa-voltar{display:inline-flex}.wa-conv-n{display:none}}
+
+.wa-fio{flex:1;min-height:0;overflow:auto;padding:16px 20px}
+.wa-fio>.wa-info,.wa-fio>.wa-msg{margin:0}
+.wa-mais{display:flex;margin:0 auto 12px}
+.wa-fio-vazio{padding:32px 0;text-align:center}
+.wa-linhas{list-style:none;display:flex;flex-direction:column;gap:6px}
+.wa-dia{align-self:center;margin:12px 0 4px}
+.wa-dia span{display:inline-block;padding:3px 12px;font-size:11px;font-weight:600;color:var(--text-2);background:var(--surface);border:1px solid var(--border);border-radius:99px}
+
+.wa-linha{display:flex}
+.wa-linha.saida{justify-content:flex-end}
+.wa-bolha{max-width:min(520px,84%);min-width:0;padding:8px 12px 6px;background:var(--surface);border:1px solid var(--border);border-radius:12px 12px 12px 4px}
+.wa-linha.saida .wa-bolha{background:#DDF0EE;border-color:#C4E3E0;border-radius:12px 12px 4px 12px}
+.wa-bolha.falhou{background:#FDF3F3;border-color:#E9B3B3}
+
+.wa-orig{display:inline-flex;align-items:center;gap:4px;margin-bottom:3px;font-size:11px;font-weight:600;color:var(--teal-dark)}
+.wa-orig.humano{color:#B85A1F}
+.wa-orig.sistema{color:var(--text-3)}
+.wa-texto{line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+.wa-texto.vazio{font-style:italic;color:var(--text-3)}
+.wa-opcao{display:inline-block;margin-top:4px;padding:1px 8px;font-size:11px;color:var(--text-2);background:rgba(20,48,46,.07);border-radius:99px}
+
+.wa-cita{display:grid;gap:1px;margin-bottom:6px;padding:4px 8px;font-size:12px;color:var(--text-2);background:rgba(20,48,46,.06);border-left:3px solid var(--teal);border-radius:4px}
+.wa-cita strong{font-size:11px;color:var(--teal-dark)}
+.wa-cita span{overflow-wrap:anywhere}
+
+.wa-erro{margin-top:4px;font-size:12px;font-weight:500;color:#9B2C2C;overflow-wrap:anywhere}
+.wa-rod{display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-top:2px;font-size:11px;color:var(--text-3)}
+.wa-cobr{padding:0 6px;font-weight:600;color:#A4501A;background:#FDF0E6;border-radius:99px}
+.wa-st{display:inline-flex;font-size:14px}
+.wa-st.lida{color:var(--teal-dark)}
+.wa-st.falhou{color:#9B2C2C}
+
+@media (max-width:900px){.wa-fio{padding:12px}.wa-bolha{max-width:92%}}
+
+/* reação: selo preso à borda inferior da bolha */
+.wa-bolha{position:relative}
+.wa-bolha.com-reacao{margin-bottom:12px}
+.wa-reacoes{position:absolute;right:10px;bottom:-12px;display:inline-flex;gap:2px;padding:1px 6px;font-size:13px;line-height:18px;background:var(--surface);border:1px solid var(--border);border-radius:99px;box-shadow:0 1px 2px rgba(20,48,46,.12)}
+.wa-linha.entrada .wa-reacoes{right:auto;left:10px}
+.wa-reacao-solta{align-self:center;font-size:11px;color:var(--text-3)}

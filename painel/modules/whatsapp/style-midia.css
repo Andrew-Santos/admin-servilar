@@ -1,0 +1,39 @@
+/* modules/whatsapp/style-midia.css — imagem, vídeo, áudio (estilo WhatsApp) e documento */
+.wa-gira{animation:wa-gira 1s linear infinite}
+@keyframes wa-gira{to{transform:rotate(360deg)}}
+.wa-midia-erro{font-size:11px;color:#9B2C2C;overflow-wrap:anywhere}
+
+/* documento / mídia indisponível */
+.wa-midia{display:grid;gap:8px;margin-bottom:4px;padding:8px 10px;background:rgba(20,48,46,.06);border-radius:var(--radius)}
+.wa-midia-topo{display:flex;align-items:center;gap:10px}
+.wa-midia-topo>i{font-size:24px;color:var(--teal-dark)}
+.wa-midia-topo div{display:grid;min-width:0}
+.wa-midia strong{overflow-wrap:anywhere}
+.wa-midia small{font-size:11px;color:var(--text-3);overflow-wrap:anywhere}
+.wa-midia .wa-btn{justify-self:start;height:28px;font-size:12px}
+
+/* imagem e vídeo */
+.wa-visor{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:6px;min-width:200px;min-height:120px;margin-bottom:4px;padding:8px;background:rgba(20,48,46,.06);border-radius:var(--radius)}
+.wa-visor.pronto{min-width:0;min-height:0;padding:0;background:none}
+.wa-visor>.wa-carga{align-self:center;font-size:28px;color:var(--text-3)}
+.wa-visor a{display:block;max-width:100%}
+.wa-img{display:block;max-width:100%;max-height:320px;border-radius:var(--radius)}
+.wa-img.wa-figurinha{max-width:160px;max-height:160px}
+.wa-video{display:block;max-width:100%;max-height:320px;border-radius:var(--radius)}
+
+/* áudio */
+.wa-audio{display:flex;align-items:center;gap:8px;width:280px;max-width:100%}
+.wa-play{flex:none;width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;font-size:18px;color:#fff;background:var(--teal-dark);border:none;border-radius:50%;cursor:pointer}
+.wa-play:disabled{opacity:.7;cursor:default}
+.wa-audio-meio{flex:1;min-width:0;display:grid;gap:2px}
+.wa-onda{position:relative;height:26px;display:flex;align-items:center;gap:2px;cursor:pointer}
+.wa-onda>span{flex:1;min-width:2px;background:#B9C9C7;border-radius:2px}
+.wa-onda>span.on{background:var(--teal-dark)}
+.wa-onda-ponto{position:absolute;top:50%;left:0;width:12px;height:12px;margin:-6px 0 0 -6px;background:var(--teal-dark);border-radius:50%;pointer-events:none}
+.wa-audio-tempo{font-size:11px;color:var(--text-3)}
+.wa-menu{position:relative;flex:none}
+.wa-menu>summary{list-style:none;display:inline-flex;padding:4px;font-size:18px;color:var(--text-3);border-radius:50%;cursor:pointer}
+.wa-menu>summary::-webkit-details-marker{display:none}
+.wa-menu>summary:hover{background:rgba(20,48,46,.08)}
+.wa-menu-item{position:absolute;right:0;top:100%;z-index:5;display:flex;align-items:center;gap:6px;padding:8px 12px;font:inherit;font-size:13px;white-space:nowrap;color:var(--text-1);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 4px 12px rgba(20,48,46,.15);cursor:pointer}
+.wa-menu-item:hover{background:var(--teal-soft)}

@@ -4,12 +4,13 @@
 
 export const MENU = [
   { grupo: 'Cadastros', itens: [
-    { id: 'especialidades', titulo: 'Especialidades',    icone: 'wrench' },
-    { id: 'servicos',       titulo: 'Serviços',          icone: 'toolbox' },
-        { id: 'regioes',        titulo: 'Regiões',           icone: 'map-pin' },
-
+    { id: 'servicos',       titulo: 'Serviços',          icone: 'toolbox' },   // especialidades + os serviços de cada uma
+    { id: 'regioes',        titulo: 'Regiões',           icone: 'map-pin' },
     { id: 'profissionais',  titulo: 'Profissionais',     icone: 'hard-hat' },
     { id: 'clientes',       titulo: 'Clientes',          icone: 'users' },
+  ]},
+  { grupo: 'Atendimento', itens: [
+    { id: 'whatsapp',       titulo: 'WhatsApp',          icone: 'whatsapp-logo' },   // histórico de mensagens recebidas e enviadas
   ]},
 ];
 
@@ -116,4 +117,4 @@ export function iniciarMenu(ctx) {
 
   addEventListener('hashchange', abrir);
   abrir();
-}
+}

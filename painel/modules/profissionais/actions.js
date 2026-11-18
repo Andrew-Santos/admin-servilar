@@ -10,7 +10,7 @@ export const SITUACAO = {
 };
 // Situação do cadastro inteiro
 export const SITUACAO_CADASTRO = {
-  pendente:            { texto: 'Pendente',            cor: '' },
+  pendente:            { texto: 'Em aberto',           cor: '' },
   em_analise:          { texto: 'Em análise',          cor: 'aguarda' },
   ajustes_necessarios: { texto: 'Ajustes necessários', cor: 'neg' },
   ativo:               { texto: 'Ativo',               cor: 'ok' },
@@ -80,7 +80,7 @@ export const desbloquear = id => enviarBloqueio(id, { acao: 'desbloquear' });
 export const urlGoogleMaps = (lat, lng) => `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
 export const rotuloCidade = i => (i.cidade ? (i.uf ? `${i.cidade} / ${i.uf}` : i.cidade) : '');
 
-const ORDEM_SITUACAO = { em_analise: 0, ajustes_necessarios: 1, bloqueado: 2, ativo: 3 };
+const ORDEM_SITUACAO = { em_analise: 0, ajustes_necessarios: 1, bloqueado: 2, ativo: 3, pendente: 4 };
 const CHAVES = {
   nome: i => i.nome,
   cidade: i => rotuloCidade(i),
@@ -95,4 +95,27 @@ export function ordenar(itens, { col, dir }) {
     const c = typeof x === 'string' ? x.localeCompare(y, 'pt') : x - y;
     return (c || a.nome.localeCompare(b.nome, 'pt')) * f;
   });
+}
+
+// ── Cadastros em aberto (status "pendente": o profissional começou e ainda não enviou para análise) ──
+export const NOME_ETAPA = { dados: 'Dados pessoais', foto: 'Foto de perfil', video: 'Vídeo', especialidades: 'Especialidades', endereco: 'Endereço', pagamento: 'Pix' };
+export const DIAS_PARADO = 7;
+export const diasDesde = iso => {
+  const t = new Date(iso).getTime();
+  return Number.isNaN(t) ? null : Math.max(0, Math.floor((Date.now() - t) / 86400000));
+};
+export const textoDias = d => (d === null ? '' : d === 0 ? 'hoje' : d === 1 ? 'há 1 dia' : `há ${d} dias`);
+
+// Contagem por situação, taxa de cadastros em aberto e onde eles mais param
+export function resumoCadastros(itens) {
+  const porStatus = {}, onde = {};
+  itens.forEach(i => { porStatus[i.status] = (porStatus[i.status] || 0) + 1; });
+  const abertos = itens.filter(i => i.status === 'pendente');
+  abertos.forEach(i => { if (i.parou_em) onde[i.parou_em] = (onde[i.parou_em] || 0) + 1; });
+  return {
+    total: itens.length, porStatus,
+    taxaAberto: itens.length ? Math.round(abertos.length * 100 / itens.length) : 0,
+    parados: abertos.filter(i => (diasDesde(i.atualizado_em) ?? 0) >= DIAS_PARADO).length,
+    onde: Object.entries(onde).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([id, n]) => ({ id, n })),
+  };
 }

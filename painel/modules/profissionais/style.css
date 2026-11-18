@@ -35,3 +35,15 @@ textarea.pf-campo{height:auto;padding:8px 10px;resize:vertical;line-height:1.45}
 .pf-aba{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 14px;font-size:13px;font-weight:500;color:var(--text-2);background:none;border:none;border-radius:6px;cursor:pointer}
 .pf-aba.ativa{color:#fff;background:var(--teal-dark)}
 .pf-painel{flex:1;min-height:0;display:flex;flex-direction:column}
+
+/* ── faixa de resumo: situação dos cadastros ── */
+.pf-faixa{flex:none}
+.pf-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.pf-card{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 14px;font:inherit;text-align:left;color:var(--text-1);background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);cursor:pointer}
+.pf-card strong{font-family:var(--font-title);font-size:20px;line-height:1.1}
+.pf-card span{font-size:12px;color:var(--text-2)}
+.pf-card:hover{border-color:var(--teal)}
+.pf-card.ativo{border-color:var(--teal-dark);background:var(--teal-soft)}
+.pf-card.aberto strong{color:#B85A1F}
+.pf-resumo-nota{margin-top:8px;line-height:1.5}
+.pf-aberto{font-size:12px;color:var(--text-2)}

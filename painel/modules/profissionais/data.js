@@ -20,7 +20,7 @@ async function chamar(caminho = '', { metodo = 'GET', corpo, bruto } = {}) {
   return dados;
 }
 
-export const listar = async () => (await chamar()).itens;                          // [{ id, nome, cpf, status, para_avaliar, reprovadas }]
+export const listar = async () => { const d = await chamar(); return { itens: d.itens, truncado: !!d.truncado }; }; // itens: [{ id, nome, cpf, status, para_avaliar, reprovadas, parou_em, ... }]
 export const buscarFicha = async id => (await chamar('/' + id)).profissional;      // ficha completa
 export const enviarAvaliacao = (id, corpo) => chamar(`/${id}/avaliar`, { metodo: 'PUT', corpo }); // { topico, status, motivo? }
 export const baixarArquivo = (id, tipo) => chamar(`/${id}/arquivo/${tipo}`, { bruto: true });     // Blob (foto ou vídeo)

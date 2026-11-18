@@ -22,7 +22,7 @@ const temPino = p => typeof p.lat === 'number' && typeof p.lng === 'number';
 const CORPO = {
   dados: p => h('dl', { class: 'pf-dados' },
     linhaDado('Nome', p.nome), linhaDado('CPF', p.cpf), linhaDado('WhatsApp', formatarWhatsapp(p.whatsapp)),
-    linhaDado('Nascimento', dataBR(p.data_nascimento)), linhaDado('Gênero', GENERO[p.genero] || '')),
+    linhaDado('E-mail', p.email), linhaDado('Nascimento', dataBR(p.data_nascimento)), linhaDado('Gênero', GENERO[p.genero] || '')),
   foto: p => infoArquivo(p.foto), // a foto em si aparece na coluna da esquerda
   video: (p, ctx) => videoSobDemanda(p, ctx),
   especialidades: p => p.especialidades.length
