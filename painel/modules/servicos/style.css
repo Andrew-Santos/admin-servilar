@@ -2,6 +2,7 @@
    Carregado ao abrir o módulo e REMOVIDO ao sair (menu.js). As janelas ficam em style-especialidade.css e style-servico.css. */
 @import './style-especialidade.css';
 @import './style-servico.css';
+@import './style-adicional.css';
 
 .ct-body.mod-servicos{display:flex;flex-direction:column;overflow:auto}
 .ct-body.mod-servicos.es-modal,.ct-body.mod-servicos.sv-modal{overflow:hidden}   /* trava a rolagem do fundo com a janela aberta */

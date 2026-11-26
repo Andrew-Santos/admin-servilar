@@ -4,9 +4,11 @@ import { h, plural, norm } from './ui.js';
 import { blocoEspecialidade, vazioLista } from './ui-lista.js';
 import { criarEspecialidade } from './especialidade.js';
 import { criarServico } from './servico.js';
+import { criarAdicional } from './adicional.js';
 
 let vivo = false, timer = 0, limpar = null;
 const porNome = (a, b) => a.nome.localeCompare(b.nome, 'pt');
+const porOrdem = (a, b) => a.ordem - b.ordem || porNome(a, b);
 
 const HTML = `
   <div class="cat">
@@ -66,7 +68,7 @@ export default {
     conteudo.innerHTML = HTML; filtros.innerHTML = FILTROS;
 
     const $ = s => conteudo.querySelector(s) || filtros.querySelector(s);
-    let esp = [], sv = [], primeira = true;
+    let esp = [], sv = [], ad = [], adOk = false, primeira = true;   // adOk: false se os adicionais não puderam ser carregados
     const abertas = new Set();                     // especialidades abertas (a busca abre as que têm resultado)
 
     function toast(t) {
@@ -74,7 +76,10 @@ export default {
       clearTimeout(timer); timer = setTimeout(() => { el.hidden = true; }, 3200);
     }
     // o select de serviço usa `ativo`; a especialidade usa `status`
-    const sincronizar = () => servico.definir({ sv, esps: esp.map(e => ({ id: e.id, nome: e.nome, ativo: e.status })) });
+    const sincronizar = () => {
+      const esps = esp.map(e => ({ id: e.id, nome: e.nome, ativo: e.status }));
+      servico.definir({ sv, esps }); adicional.definir({ ad, esps });
+    };
 
     const especialidade = criarEspecialidade({
       $, conteudo, toast,
@@ -98,7 +103,16 @@ export default {
       },
       aoExcluir: s => { sv = sv.filter(x => x.id !== s.id); servico.definir({ sv }); renderLista(); },
     });
-    limpar = () => { especialidade.desligar(); servico.desligar(); };
+    const adicional = criarAdicional({
+      $, conteudo, toast,
+      aoSalvar: (r, novo) => {
+        ad = novo ? [...ad, r] : ad.map(x => x.id === r.id ? r : x);
+        abertas.add(r.especialidade_id);           // deixa a especialidade aberta para ver o adicional
+        adicional.definir({ ad }); renderLista();
+      },
+      aoExcluir: a => { ad = ad.filter(x => x.id !== a.id); adicional.definir({ ad }); renderLista(); },
+    });
+    limpar = () => { especialidade.desligar(); servico.desligar(); adicional.desligar(); };
 
     // ── Lista (com os filtros do painel) ──
     function renderLista() {
@@ -110,18 +124,23 @@ export default {
         const seus = sv.filter(s => s.especialidade_id === e.id).sort(porNome);
         const daEsp = !q || norm(e.nome).includes(q) || norm(e.descricao).includes(q);   // a busca bateu na especialidade: mostra todos os serviços dela
         const lista = seus.filter(s => stOk(s.ativo) && (daEsp || norm(s.nome).includes(q) || norm(s.descricao).includes(q)));
-        if (!(daEsp && stOk(e.status)) && !lista.length) return;
+        const seusAd = ad.filter(a => a.especialidade_id === e.id).sort(porOrdem);
+        const listaAd = seusAd.filter(a => stOk(a.ativo) && (daEsp || norm(a.nome).includes(q) || norm(a.descricao).includes(q)));
+        if (!(daEsp && stOk(e.status)) && !lista.length && !listaAd.length) return;
         blocos.push(blocoEspecialidade(e, {
           servicos: lista, total: seus.length, filtrado: lista.length !== seus.length, aberto: abertas.has(e.id) || !!q,
+          adicionais: listaAd, totalAd: seusAd.length, adOk,
           onAlternar: abre => { abre ? abertas.add(e.id) : abertas.delete(e.id); },
           onDetalhes: () => especialidade.ver(e, `[data-detalhes="${e.id}"]`),
           onNovoServico: () => servico.novo(e.id, `[data-novo-sv="${e.id}"]`),
           onAbrirServico: s => servico.ver(s, `[data-sv="${s.id}"] .nb`),
+          onNovoAdicional: () => adicional.novo(e.id, `[data-novo-ad="${e.id}"]`),
+          onAbrirAdicional: a => adicional.ver(a, `[data-ad="${a.id}"] .nb`),
         }));
       });
       $('#cat-n').textContent = blocos.length === esp.length ? esp.length : `${blocos.length}/${esp.length}`;
       const ativos = sv.filter(s => s.ativo).length;
-      $('#cat-sub').textContent = `${plural(sv.length, 'serviço', 'serviços')} · ${plural(ativos, 'ativo', 'ativos')}`;
+      $('#cat-sub').textContent = `${plural(sv.length, 'serviço', 'serviços')} · ${plural(ativos, 'ativo', 'ativos')}` + (adOk ? ` · ${plural(ad.length, 'adicional', 'adicionais')}` : '');
       $('#cat-lista').replaceChildren(...(blocos.length ? blocos : [esp.length
         ? vazioLista('Nenhuma especialidade ou serviço com esses filtros.')
         : vazioLista('Nenhuma especialidade cadastrada ainda.',
@@ -138,13 +157,16 @@ export default {
     const carregar = async () => {
       $('#cat-lista').replaceChildren(vazioLista('Carregando…'));
       try {
-        // se os preços por município falharem (ex.: tabela ainda não criada), o resto continua funcionando
-        const [de, ds, dp] = await Promise.all([
+        // se os preços por município (do serviço ou do adicional) ou os adicionais falharem (ex.: tabela ainda não criada), o resto continua funcionando
+        const [de, ds, dp, da, dpa] = await Promise.all([
           data.carregarEspecialidades(), data.carregarServicos(),
-          data.carregarPrecos().catch(e => { console.error(e); return null; })]);
+          data.carregarPrecos().catch(e => { console.error(e); return null; }),
+          data.carregarAdicionais().catch(e => { console.error(e); return null; }),
+          data.carregarPrecosAdicionais().catch(e => { console.error(e); return null; })]);
         if (!vivo) return;
         esp = [...de.especialidades].sort(porNome); sv = [...ds.servicos];
-        especialidade.definir({ esp, regioes: de.regioes }); servico.definirPrecos(dp); sincronizar();
+        adOk = !!da; ad = da?.adicionais ?? [];
+        especialidade.definir({ esp, regioes: de.regioes }); servico.definirPrecos(dp); adicional.definirPrecos(dpa); sincronizar();
         $('#cat-fu').replaceChildren(h('option', { value: '', text: 'Todos os estados' }), ...especialidade.ufs().map(u => h('option', { value: u, text: u })));
         if (primeira) { primeira = false; if (esp[0]) abertas.add(esp[0].id); }
         renderLista();

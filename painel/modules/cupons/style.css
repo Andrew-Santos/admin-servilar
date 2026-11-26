@@ -1,0 +1,68 @@
+/* modules/cupons/style.css — Cupons: lista em tabela (prefixo cp-)
+   Carregado ao abrir o módulo e REMOVIDO ao sair (menu.js). A janela do cupom fica em style-cupom.css. */
+@import './style-cupom.css';
+
+.ct-body.mod-cupons{display:flex;flex-direction:column;overflow:auto}
+.ct-body.mod-cupons.cp-modal{overflow:hidden}   /* trava a rolagem do fundo com a janela aberta */
+.cp{flex:1;min-height:360px;display:flex;flex-direction:column}
+.cp button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+
+/* ── cartão da lista ── */
+.cp-main{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+.cp-bar{flex:none;display:flex;align-items:center;gap:16px;padding:16px 20px;border-bottom:1px solid var(--border)}
+.cp-ttit{flex:1;min-width:0;display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px}
+.cp-ttit h2{font-family:var(--font-title);font-size:16px;font-weight:600}
+.cp-ttit b{align-self:center;min-width:22px;padding:2px 7px;font-size:11px;font-weight:600;text-align:center;color:var(--teal-dark);background:var(--teal-soft);border-radius:10px}
+.cp-sub{font-size:12px;color:var(--text-3)}
+.cp-novo{flex:none;display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 16px;font-size:13px;font-weight:600;color:#fff;background:var(--teal-dark);border:none;border-radius:var(--radius);cursor:pointer;transition:background .12s}
+.cp-novo:hover{background:var(--teal)}
+.cp-lista{flex:1;min-height:0;overflow:auto}
+.cp-vazio{display:flex;flex-direction:column;align-items:center;gap:12px;padding:48px 16px;text-align:center;font-size:13px;line-height:1.6;color:var(--text-3)}
+
+/* ── tabela ── */
+.cp-tbw{overflow-x:auto}
+.cp-tb{width:100%;min-width:820px;border-collapse:separate;border-spacing:0;table-layout:fixed;font-variant-numeric:tabular-nums}
+.cp-tb .c-dc{width:110px}
+.cp-tb .c-qm{width:176px}
+.cp-tb .c-us{width:110px}
+.cp-tb .c-vl{width:108px}
+.cp-tb .c-st{width:112px}
+.cp-tb .c-go{width:44px}
+.cp-tb th{padding:11px 16px;text-align:left;font-size:12px;font-weight:600;color:var(--text-3);background:var(--bg);box-shadow:inset 0 -1px 0 var(--border)}
+.cp-tb th.r,.cp-tb td.r{text-align:right}
+.cp-tb td{height:68px;padding:0 16px;font-size:13px;vertical-align:middle;white-space:nowrap;border-bottom:1px solid var(--border)}
+.cp-tb tbody tr:last-child td{border-bottom:none}
+.cp-tb tbody tr{cursor:pointer;transition:background .1s}
+.cp-tb tbody tr:hover{background:rgba(47,156,149,.05)}
+.cp-tb tbody tr:hover td:first-child{box-shadow:inset 3px 0 0 var(--teal)}
+.cp-tb td.nm{overflow:hidden;white-space:normal}
+.cp-nmw{display:flex;flex-direction:column;gap:3px;min-width:0}
+.cp-nb{max-width:100%;padding:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;font:inherit;font-weight:600;letter-spacing:.03em;color:var(--text-1);background:none;border:none;cursor:pointer}
+.cp-ds{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--text-3)}
+.cp-ds.sem{opacity:.65}
+.cp-dc{font-weight:600;color:var(--text-1)}
+.cp-mudo{color:var(--text-3)}
+.cp-chip{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:0 9px;font-size:12px;font-weight:500;line-height:24px;color:var(--text-2);background:var(--bg);border:1px solid var(--border);border-radius:6px}
+.cp-chip i{font-size:13px;color:var(--text-3)}
+.cp-tb td.go{text-align:right;font-size:14px;color:var(--text-3)}
+.cp-tb tbody tr:hover td.go{color:var(--teal-dark)}
+.cp-tb tr.off .cp-nb,.cp-tb tr.off .cp-dc{color:var(--text-3)}
+
+/* situação */
+.cp-pill{display:inline-flex;align-items:center;gap:6px;padding:0 9px;font-size:11.5px;font-weight:600;line-height:22px;white-space:nowrap;border-radius:11px}
+.cp-pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.cp-pill.ativo{color:var(--teal-dark);background:var(--teal-soft)}
+.cp-pill.inativo{color:var(--text-3);background:var(--bg)}
+.cp-pill.expirado,.cp-pill.esgotado{color:#B85A1F;background:rgba(227,115,45,.1)}
+
+/* aviso rápido */
+.cp-toast{position:fixed;left:50%;bottom:28px;z-index:70;transform:translateX(-50%);max-width:calc(100% - 32px);padding:11px 18px;font-size:13px;font-weight:500;color:#fff;background:var(--teal-dark);border-radius:var(--radius);box-shadow:0 8px 24px rgba(10,30,28,.25)}
+
+/* ── telas pequenas: fica só cupom, desconto e status ── */
+@media (max-width:700px){
+  .cp-tb{min-width:0}
+  .cp-tb th:nth-child(3),.cp-tb td:nth-child(3),.cp-tb th:nth-child(4),.cp-tb td:nth-child(4),.cp-tb th:nth-child(5),.cp-tb td:nth-child(5),
+  .cp-tb .c-qm,.cp-tb .c-us,.cp-tb .c-vl{display:none}
+  .cp-tb th,.cp-tb td{padding-left:12px;padding-right:12px}
+}
+@media (max-width:600px){ .cp-bar{flex-wrap:wrap} }

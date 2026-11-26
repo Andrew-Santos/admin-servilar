@@ -5,11 +5,12 @@
 export const MENU = [
   { grupo: 'Cadastros', itens: [
     { id: 'servicos',       titulo: 'Serviços',          icone: 'toolbox' },   // especialidades + os serviços de cada uma
+    { id: 'cupons',         titulo: 'Cupons',            icone: 'ticket' },    // cupons de desconto (nome, desconto, CPF exclusivo, usos, validade)
     { id: 'regioes',        titulo: 'Regiões',           icone: 'map-pin' },
     { id: 'profissionais',  titulo: 'Profissionais',     icone: 'hard-hat' },
-    { id: 'clientes',       titulo: 'Clientes',          icone: 'users' },
   ]},
   { grupo: 'Atendimento', itens: [
+    { id: 'clientes',       titulo: 'Clientes',          icone: 'users' },          // só consulta: o cliente nasce no atendimento pelo WhatsApp
     { id: 'whatsapp',       titulo: 'WhatsApp',          icone: 'whatsapp-logo' },   // histórico de mensagens recebidas e enviadas
   ]},
 ];
@@ -117,4 +118,4 @@ export function iniciarMenu(ctx) {
 
   addEventListener('hashchange', abrir);
   abrir();
-}
+}

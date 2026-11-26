@@ -24,4 +24,6 @@ export const listar = async () => { const d = await chamar(); return { itens: d.
 export const buscarFicha = async id => (await chamar('/' + id)).profissional;      // ficha completa
 export const enviarAvaliacao = (id, corpo) => chamar(`/${id}/avaliar`, { metodo: 'PUT', corpo }); // { topico, status, motivo? }
 export const baixarArquivo = (id, tipo) => chamar(`/${id}/arquivo/${tipo}`, { bruto: true });     // Blob (foto ou vídeo)
+export const enviarAvaliacaoAlteracao = (id, altId, corpo) => chamar(`/${id}/alteracoes/${altId}/avaliar`, { metodo: 'PUT', corpo }); // { status, motivo? }
+export const baixarArquivoAlteracao = (id, altId) => chamar(`/${id}/alteracoes/${altId}/arquivo`, { bruto: true });             // Blob (foto nova)
 export const enviarBloqueio = (id, corpo) => chamar(`/${id}/bloqueio`, { metodo: 'PUT', corpo });             // { acao, motivo?, detalhe? }

@@ -1,0 +1,34 @@
+/* modules/clientes/style.css — tabela e janela da ficha (prefixo cl-). Carregado ao abrir o módulo e removido ao sair. */
+@import './style-tabela.css';
+@import './style-mapa.css';
+@import './style-janela.css';
+@import './style-ficha.css';
+
+.ct-body.mod-clientes{display:flex;flex-direction:column;overflow:hidden}
+.cl{flex:1;min-height:0;display:flex;flex-direction:column;gap:14px}
+
+.cl-campo{width:100%;height:36px;padding:0 10px;font:inherit;color:var(--text-1);background:#fff;border:1.5px solid var(--border);border-radius:var(--radius)}
+.cl-campo:focus{border-color:var(--teal);outline:none}
+.cl-fl{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.cl-fl label{font-size:12px;font-weight:600;color:var(--text-2)}
+
+.cl-selo{display:inline-flex;align-items:center;height:22px;padding:0 10px;border-radius:99px;font-size:11px;font-weight:600;white-space:nowrap;background:#EEF1F1;color:var(--text-2)}
+.cl-selo.ok{background:var(--teal-soft);color:var(--teal-dark)}
+.cl-selo.aguarda{background:#FDF0E6;color:#A4501A}
+.cl-selo.neg{background:#FDECEC;color:#9B2C2C}
+
+.cl-btn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;font-size:13px;font-weight:500;color:var(--text-1);text-decoration:none;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);cursor:pointer}
+.cl-btn:hover{border-color:var(--teal);color:var(--teal-dark)}
+.cl-info,.cl-vazio{font-size:12px;color:var(--text-3)}
+.cl-msg{margin-top:10px;padding:8px 12px;font-size:12px;line-height:1.45;color:var(--text-2);background:var(--bg);border-radius:var(--radius)}
+.cl-msg.neg{color:#9B2C2C;background:#FDECEC}
+
+/* ── barra superior: título, contador e resumo ── */
+.cl-bar{flex:none;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cl-bar h2{font-family:var(--font-title);font-size:15px;font-weight:600}
+.cl-bar b{min-width:22px;padding:2px 7px;font-size:11px;font-weight:600;text-align:center;color:var(--teal-dark);background:var(--teal-soft);border-radius:10px}
+.cl-sub{font-size:12px;color:var(--text-3)}
+.cl-abas{margin-left:auto;display:flex;padding:3px;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
+.cl-aba{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 14px;font-size:13px;font-weight:500;color:var(--text-2);background:none;border:none;border-radius:6px;cursor:pointer}
+.cl-aba.ativa{color:#fff;background:var(--teal-dark)}
+.cl-painel{flex:1;min-height:0;display:flex;flex-direction:column}

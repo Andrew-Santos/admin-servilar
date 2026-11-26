@@ -1,0 +1,21 @@
+/* modules/clientes/style-tabela.css — tabela de clientes */
+.cl-tabela-caixa{flex:1;min-height:0;overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+.cl-tabela{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.cl-tabela th{position:sticky;top:0;z-index:1;padding:0 16px;height:42px;text-align:left;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);background:#FAFBFB;border-bottom:1px solid var(--border);white-space:nowrap}
+.cl-th{display:inline-flex;align-items:center;gap:4px;padding:0;font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;background:none;border:none;cursor:pointer}
+.cl-th:hover,.cl-th.ativo{color:var(--teal-dark)}
+.cl-tabela td{padding:11px 16px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap}
+.cl-linha-tab{cursor:pointer}
+.cl-linha-tab:hover{background:rgba(47,156,149,.06)}
+.cl-linha-tab:last-child td{border-bottom:none}
+.cl-nome-btn{padding:0;font:inherit;font-weight:600;text-align:left;color:var(--text-1);background:none;border:none;cursor:pointer}
+.cl-nome-btn.cl-sem{font-weight:500;font-style:italic;color:var(--text-3)}
+.cl-mudo{color:var(--text-2)}
+.cl-nada{color:var(--text-3)}
+.cl-vazio-tab{padding:40px 16px;text-align:center;color:var(--text-3);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+
+/* telas pequenas: ficam só cliente e WhatsApp */
+@media (max-width:700px){
+  .cl-tabela th:nth-child(n+3),.cl-tabela td:nth-child(n+3){display:none}
+  .cl-tabela th,.cl-tabela td{padding-left:12px;padding-right:12px}
+}

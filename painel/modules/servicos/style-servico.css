@@ -10,6 +10,9 @@
 .sv-tb{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;font-variant-numeric:tabular-nums}
 .sv-tb .c-val{width:132px}
 .sv-tb .c-pl,.sv-tb .c-rp{width:128px}
+.sv-tb .c-tm{width:92px}
+.sv-tb td.tm{white-space:nowrap;font-size:13px;color:var(--text-2)}
+.sv-tb td.tm.vz,.sv-tb tr.off td.tm{color:var(--text-3)}
 .sv-tb .c-st{width:112px}
 .sv-tb .c-go{width:44px}
 .sv-tb th{padding:11px 16px;text-align:left;font-size:12px;font-weight:600;color:var(--text-3);background:var(--bg);box-shadow:inset 0 -1px 0 var(--border)}
@@ -130,7 +133,9 @@ textarea.sv-campo{height:auto;min-height:72px;max-height:160px;padding:9px 12px;
 .sv-sw input:focus-visible + .sv-trilho{outline:3px solid rgba(47,156,149,.45);outline-offset:2px}
 
 /* formulário: composição do valor — percentual e valor lado a lado */
-.sv-fl{display:grid;grid-template-columns:minmax(0,1fr) 112px 148px;gap:10px 12px;align-items:center}
+.sv-fl{display:grid;grid-template-columns:minmax(0,1fr) 112px 148px 92px;gap:10px 12px;align-items:center}
+.sv-hr{text-align:right;white-space:nowrap;font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--text-2)}
+.sv-hr.vz{color:var(--text-3)}
 .sv-th{font-size:12px;font-weight:500;color:var(--text-3)}
 .sv-fl .lb{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:500;color:var(--text-1)}
 .sv-fixo{display:flex;align-items:center;justify-content:flex-end;height:38px;padding:0 12px;font-size:13px;color:var(--text-3)}
@@ -201,16 +206,29 @@ textarea.sv-campo{height:auto;min-height:72px;max-height:160px;padding:9px 12px;
 .sv-lk:hover{color:var(--teal-dark)}
 .sv-ref{margin:-4px 0 14px}
 
+/* tópicos: formulário (incluso / não incluso) e visualização */
+.sv-tps{display:flex;flex-direction:column;gap:8px}
+.sv-tp{display:flex;align-items:center;gap:6px}
+.sv-tp .sv-campo{flex:1;min-width:0}
+.sv-tp-add{align-self:flex-start}
+.sv-tops{display:flex;flex-direction:column;gap:7px;margin:0;padding:0;list-style:none}
+.sv-tops li{display:flex;align-items:flex-start;gap:9px;font-size:13px;line-height:1.5;color:var(--text-1)}
+.sv-tops li i{flex:none;margin-top:2px;font-size:15px}
+.sv-tops.inc li i{color:var(--teal-dark)}
+.sv-tops.ninc li,.sv-tops.ninc li i{color:var(--text-3)}
+
 /* ── telas pequenas ── */
 @media (max-width:600px){
   .sv-ov{align-items:flex-end;padding:0}
   .sv-dlg{width:100%;max-height:92dvh;border-radius:16px 16px 0 0}
   /* só nome + valor: comissão, repasse, status e seta ficam para a janela (linhas inativas já aparecem esmaecidas) */
-  .sv-tb th:nth-child(n+3),.sv-tb td:nth-child(n+3),.sv-tb .c-pl,.sv-tb .c-rp,.sv-tb .c-st,.sv-tb .c-go{display:none}
+  .sv-tb th:nth-child(n+3),.sv-tb td:nth-child(n+3),.sv-tb .c-pl,.sv-tb .c-rp,.sv-tb .c-tm,.sv-tb .c-st,.sv-tb .c-go{display:none}
   .sv-tb .c-val{width:112px}
   .nb{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.3}
   .sv-fl{grid-template-columns:1fr 1fr}
   .sv-fl .sv-th,.sv-fl .sv-fixo{display:none}
+  .sv-fl .sv-hr{grid-column:1/-1;margin-top:-4px;text-align:left}
+  .sv-fl .sv-hr::before{content:"Por hora: "}
   .sv-fl .lb{grid-column:1/-1;margin-top:4px}
   .sv-fl .lb:first-of-type{margin-top:0}
   .sv-fl .sv-ad.tot{grid-column:1/-1}

@@ -1,0 +1,15 @@
+/* modules/clientes/style-mapa.css — mapa geral */
+.cl-mapa{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+.cl-mapa-topo{flex:none;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cl-cidades{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cl-cidades-tit{font-size:12px;font-weight:600;color:var(--text-2)}
+.cl-chip{height:26px;padding:0 10px;font-size:12px;font-weight:500;color:var(--teal-dark);background:var(--teal-soft);border:none;border-radius:99px;cursor:pointer}
+.cl-chip:hover{background:#D3EBE9}
+.cl-mapa-aviso{margin-left:auto;font-size:12px;color:var(--text-3)}
+.cl-mapa-caixa{flex:1;min-height:320px;overflow:hidden;background:#E9EFEF;border:1px solid var(--border);border-radius:var(--radius-lg)}
+.cl-mapa-caixa .cl-info{padding:16px}
+.cl-legenda{flex:none;display:flex;gap:14px;flex-wrap:wrap;list-style:none;font-size:12px;color:var(--text-2)}
+.cl-legenda li{display:flex;align-items:center;gap:6px}
+.cl-ponto{width:10px;height:10px;border-radius:50%}
+.cl-pop{display:grid;gap:6px;justify-items:start;font-family:var(--font);font-size:13px}
+.cl-pop span{color:var(--text-3)}

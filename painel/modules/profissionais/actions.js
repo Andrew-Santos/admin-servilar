@@ -1,5 +1,5 @@
 // modules/profissionais/actions.js — regras e formatações do cliente (o servidor valida de novo)
-import { enviarAvaliacao, enviarBloqueio } from './data.js';
+import { enviarAvaliacao, enviarAvaliacaoAlteracao, enviarBloqueio } from './data.js';
 
 // Situação de cada etapa → texto e cor do selo
 export const SITUACAO = {
@@ -46,6 +46,17 @@ export async function decidir(id, topico, status, motivo = '') {
   return enviarAvaliacao(id, { topico, status, motivo: status === 'reprovado' ? limparMotivo(motivo) : undefined });
 }
 
+// Pedido de alteração de profissional já aprovado (foto/Pix novos). Reprovar exige motivo.
+export async function decidirAlteracao(id, altId, status, motivo = '') {
+  if (status === 'reprovado') {
+    const erro = validarMotivo(motivo);
+    if (erro) throw new Error(erro);
+  }
+  return enviarAvaliacaoAlteracao(id, altId, { status, motivo: status === 'reprovado' ? limparMotivo(motivo) : undefined });
+}
+export const TOPICO_ALTERACAO = { foto: 'Foto de perfil', pagamento: 'Chave Pix', whatsapp: 'WhatsApp' };
+export const STATUS_ALTERACAO = { aprovado: 'Aprovada', reprovado: 'Reprovada', cancelado: 'Cancelada' };
+
 export const formatarData = iso => {
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? '' : d.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
@@ -84,7 +95,7 @@ const ORDEM_SITUACAO = { em_analise: 0, ajustes_necessarios: 1, bloqueado: 2, at
 const CHAVES = {
   nome: i => i.nome,
   cidade: i => rotuloCidade(i),
-  situacao: i => ORDEM_SITUACAO[i.status] ?? 9,
+  situacao: i => (i.status === 'ativo' && i.para_avaliar ? 0.5 : ORDEM_SITUACAO[i.status] ?? 9), // ativo com pedido de alteração vem logo após "em análise"
   pendencias: i => -(i.para_avaliar * 10 + i.reprovadas),
 };
 // Ordena sem mexer na lista original. ordem = { col, dir: 'asc' | 'desc' }

@@ -1,6 +1,6 @@
 // modules/servicos/actions-servico.js — regras de cálculo e validação do serviço no cliente (o servidor valida de novo)
 import { criarServico, atualizarServico, excluirServico, criarPreco, atualizarPreco, excluirPreco } from './data.js';
-import { limparNome, falha } from './actions-comum.js';
+import { limparNome, limparTopicos, falha } from './actions-comum.js';
 
 // Dinheiro em CENTAVOS e percentual em CENTÉSIMOS de % (inteiros): sem erro de arredondamento de decimal.
 // Exemplo: R$ 18,07 = 1807 · 15,5% = 1550
@@ -34,6 +34,8 @@ export function definirPct(d, bp) { d.modo = 'pct'; d.bp = bp; d.plat = platDePc
 export function definirPlat(d, v) { v = Math.min(v, d.centavos); d.modo = 'plat'; d.fixo = v; d.plat = v; }
 export function definirRep(d, v) { v = Math.min(v, d.centavos); d.modo = 'rep'; d.fixo = v; d.plat = d.centavos - v; }
 
+export const MAX_DESC = 2000;   // o servidor valida de novo
+
 // ── Nome ── (gravado sempre em CAIXA ALTA; a descrição fica como foi digitada)
 
 // Devolve o texto do erro, ou '' se estiver tudo certo
@@ -43,12 +45,31 @@ export function validar(d) {
   if (n.length < 2) return 'Informe o nome (mínimo 2 caracteres).';
   if (n.length > 100) return 'Nome muito longo (máximo 100 caracteres).';
   if (!/^[\p{L}\p{N} .,'’&()\/+%:-]+$/u.test(n)) return "Use só letras, números e . , ' & ( ) / + % : -";
-  if ((d.descricao || '').length > 500) return 'Descrição muito longa (máximo 500 caracteres).';
-  return validarValores(d);
+  if ((d.descricao || '').length > MAX_DESC) return `Descrição muito longa (máximo ${MAX_DESC} caracteres).`;
+  return validarValores(d) || validarTempo(d) || validarTopicos(d);
 }
 
-// valor + comissão (serviço e regra por município usam a mesma regra)
-function validarValores(d) {
+// Tempo em minutos: obrigatório, inteiro (serviço e adicional)
+export const TEMPO_MAX = 9999;
+export function validarTempo(d) {
+  if (!(d.tempo >= 1)) return 'Informe o tempo do serviço em minutos.';
+  if (d.tempo > TEMPO_MAX) return `Tempo máximo: ${TEMPO_MAX} minutos.`;
+  return '';
+}
+
+// Tópicos de "incluso" e "não incluso" (o servidor valida de novo)
+export const MAX_TOPICOS = 30, MAX_TOPICO = 200;
+export function validarTopicos(d) {
+  for (const [lista, nome] of [[d.incluso, 'incluso'], [d.nao_incluso, 'não incluso']]) {
+    const t = limparTopicos(lista);
+    if (t.length > MAX_TOPICOS) return `Máximo de ${MAX_TOPICOS} tópicos em "${nome}".`;
+    if (t.some(x => x.length > MAX_TOPICO)) return `Cada tópico de "${nome}" pode ter até ${MAX_TOPICO} caracteres.`;
+  }
+  return '';
+}
+
+// valor + comissão (serviço, adicional e regra por município usam a mesma regra)
+export function validarValores(d) {
   if (!(d.centavos > 0)) return 'Informe o valor padrão.';
   if (d.centavos > 99999999) return 'Valor máximo: R$ 999.999,99.';
   if (!(d.plat >= 0 && d.plat <= d.centavos)) return 'A comissão da plataforma não pode ser maior que o valor padrão.';
@@ -62,6 +83,8 @@ export async function salvar(id, d) {
   const corpo = {
     especialidade_id: d.especialidade_id, nome: limparNome(d.nome), descricao: (d.descricao || '').trim(), ativo: !!d.ativo,
     valor_padrao: d.centavos / 100, valor_plataforma: d.plat / 100,
+    tempo_minutos: d.tempo,
+    incluso: limparTopicos(d.incluso), nao_incluso: limparTopicos(d.nao_incluso),
   };
   return (id ? await atualizarServico({ id, ...corpo }) : await criarServico(corpo)).servico;
 }
@@ -81,14 +104,17 @@ export function validarRegra(d) {
   return validarValores(d);
 }
 
+// Corpo gravado de uma regra de preço por município (serviço e adicional usam o mesmo)
+export const corpoRegra = d => ({
+  nome: (d.nome || '').replace(/\s+/g, ' ').trim(), ibge_ids: d.ibge_ids, ativo: !!d.ativo,
+  valor_padrao: d.centavos / 100, valor_plataforma: d.plat / 100,
+});
+
 // Cria (id nulo) ou atualiza. Devolve a regra como ficou no banco (já com os valores calculados).
 export async function salvarRegra(id, servicoId, d) {
   const erro = validarRegra(d);
   if (erro) throw falha(erro);
-  const corpo = {
-    nome: (d.nome || '').replace(/\s+/g, ' ').trim(), ibge_ids: d.ibge_ids, ativo: !!d.ativo,
-    valor_padrao: d.centavos / 100, valor_plataforma: d.plat / 100,
-  };
+  const corpo = corpoRegra(d);
   return (id ? await atualizarPreco({ id, ...corpo }) : await criarPreco({ servico_id: servicoId, ...corpo })).regra;
 }
 

@@ -1,0 +1,30 @@
+// modules/clientes/ui.js — peças de tela. Dado externo entra só por textContent (nunca innerHTML).
+
+// h('div', { class:'x', onclick: fn, text:'oi' }, filho1, filho2)
+export const h = (tag, props = {}, ...filhos) => {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) {
+    if (v == null || v === false) continue;
+    if (k === 'class') e.className = v;
+    else if (k === 'text') e.textContent = v;
+    else if (k.startsWith('on') || ['value', 'checked', 'disabled', 'hidden'].includes(k)) e[k] = v;
+    else e.setAttribute(k, v === true ? '' : v);
+  }
+  e.append(...filhos.flat().filter(f => f != null && f !== false));
+  return e;
+};
+export const icone = nome => h('i', { class: `ph ph-${nome}`, 'aria-hidden': 'true' });
+
+// Troca o conteúdo de um elemento. Ignora null/false: replaceChildren(null) escreveria a palavra "null" na tela.
+export const trocar = (el, ...filhos) => el.replaceChildren(...filhos.flat().filter(f => f != null && f !== false));
+
+export const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
+
+// Selo: selo({ texto, cor }) — cor: '' | 'ok' | 'aguarda' | 'neg'
+export const selo = s => h('span', { class: 'cl-selo ' + (s.cor || ''), text: s.texto });
+
+// Mensagem de aviso (erro ou informação)
+export const msg = (texto, tipo = '') => h('p', { class: 'cl-msg ' + tipo, role: tipo === 'neg' ? 'alert' : 'status', text: texto });
+
+// Linha "rótulo: valor" da ficha (valor vazio vira "—")
+export const linhaDado = (rotulo, valor) => h('div', { class: 'cl-dado' }, h('dt', { text: rotulo }), h('dd', { text: valor || '—' }));

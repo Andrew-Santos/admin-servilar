@@ -20,6 +20,18 @@ export const norm = s => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, 
 // Formatação (pt-BR). Dinheiro em centavos e percentual em centésimos de %.
 export const brl = centavos => (centavos / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 export const numBr = centavos => (centavos / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+// minutos → "45 min", "1h (60 min)", "1h30 (90 min)"
+export const fmtTempo = m => {
+  if (m < 60) return `${m} min`;
+  const hr = Math.floor(m / 60), r = m % 60;
+  return `${hr}h${r ? String(r).padStart(2, '0') : ''} (${m} min)`;
+};
+// versão curta para a tabela: "45 min", "5h", "1h30"
+export const fmtTempoCurto = m => {
+  if (m < 60) return `${m} min`;
+  const hr = Math.floor(m / 60), r = m % 60;
+  return `${hr}h${r ? String(r).padStart(2, '0') : ''}`;
+};
 export const pct = bp => `${(bp / 100).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}%`;
 
 export const chip = (texto, alerta = false) => h('span', { class: 'chip' + (alerta ? ' alerta' : ''), title: texto, text: texto });

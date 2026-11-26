@@ -3,6 +3,7 @@ import { SITUACAO, formatarCep, formatarWhatsapp, limparMotivo, urlGoogleMaps } 
 import { blocoBloqueio } from './ui-bloqueio.js';
 import { decisao } from './ui-decisao.js';
 import { fotoAutomatica, infoArquivo, videoSobDemanda } from './ui-arquivo.js';
+import { blocosAlteracoes } from './ui-alteracoes.js';
 import { h, icone, linhaDado, msg, selo } from './ui.js';
 
 const TIPO_PIX = { cpf: 'CPF', telefone: 'Telefone', email: 'E-mail', aleatoria: 'Chave aleatória' };
@@ -63,5 +64,5 @@ export function montarFicha(p, ctx) {
       ...corpo);
   });
   return h('div', { class: 'pf-grade' }, lateral(p, ctx),
-    h('div', { class: 'pf-secoes' }, p.status === 'ajustes_necessarios' && p.ajustes ? msg(p.ajustes) : null, ...secoes));
+    h('div', { class: 'pf-secoes' }, p.status === 'ajustes_necessarios' && p.ajustes ? msg(p.ajustes) : null, ...blocosAlteracoes(p, ctx), ...secoes));
 }

@@ -1,9 +1,12 @@
 // modules/servicos/servico.js — janela (modal) do serviço: ver, cadastrar, editar e preços por município
-import { salvar, remover, validar, salvarRegra, removerRegra, validarRegra, MAX_MUNICIPIOS, cent, bpDe, bpPlat, aplicarTotal, definirPct, definirPlat, definirRep } from './actions-servico.js';
-import { maiusculo } from './actions-comum.js';
-import { h, icone, chip, norm, numBr, brl, pct } from './ui.js';
+import { salvar, remover, validar, salvarRegra, removerRegra, validarRegra, MAX_DESC, cent, bpDe } from './actions-servico.js';
+import { maiusculo, limparTopicos } from './actions-comum.js';
+import { h, icone, chip, numBr, brl, pct } from './ui.js';
 import { pill, corpoVerServico, painelPrecos, barra } from './ui-servico.js';
 import { FORM, FORM_REGRA, RODAPE } from './servico-html.js';
+import { criarComposicao } from './composicao.js';
+import { criarTopicos } from './topicos.js';
+import { criarMunicipios } from './municipios.js';
 
 // Rascunho do formulário × cópia "como está salva" (para saber se há alteração)
 // dinheiro em centavos e percentual em centésimos de %: 15,5% = 1550
@@ -14,17 +17,20 @@ const novoDraft = s => {
     tipo: 'servico',
     especialidade_id: s?.especialidade_id ?? null, nome: s ? maiusculo(s.nome) : '', descricao: s?.descricao ?? '', ativo: s ? s.ativo : true,
     centavos, plat, modo: 'pct', bp: bpDe(centavos, plat), fixo: 0,
+    tempo: s?.tempo_minutos ?? 0,   // tempo em minutos (0 = ainda não informado)
+    incluso: [...(s?.incluso ?? [])], nao_incluso: [...(s?.nao_incluso ?? [])],   // listas de tópicos
   };
 };
 // Regra de preço por município: r = regra a editar; null = nova (começa com o preço padrão do serviço)
 const novoDraftRegra = (r, serv) => {
   const centavos = cent((r ?? serv).valor_padrao), plat = cent((r ?? serv).valor_plataforma);
   return { tipo: 'regra', nome: r?.nome ?? '', ibge_ids: r ? [...r.ibge_ids] : [], ativo: r ? r.ativo : true,
-    centavos, plat, modo: 'pct', bp: bpDe(centavos, plat), fixo: 0 };
+    centavos, plat, modo: 'pct', bp: bpDe(centavos, plat), fixo: 0,
+    tempo: serv.tempo_minutos ?? 0 };   // só para mostrar o valor por hora (não é gravado)
 };
 const chave = d => d.tipo === 'regra'
   ? JSON.stringify([d.nome.trim(), [...d.ibge_ids].sort(), d.ativo, d.centavos, d.plat])
-  : JSON.stringify([d.especialidade_id, d.nome, d.descricao, d.ativo, d.centavos, d.plat]);
+  : JSON.stringify([d.especialidade_id, d.nome, d.descricao, d.ativo, d.centavos, d.plat, d.tempo, limparTopicos(d.incluso), limparTopicos(d.nao_incluso)]);
 
 // O que se mantém quando o valor padrão é alterado (depende do último campo editado)
 const MANTEM = { pct: 'o percentual da comissão', plat: 'o valor da comissão', rep: 'o valor do repasse' };
@@ -41,6 +47,8 @@ export function criarServico(ctx) {
   let draft = novoDraft(null), orig = { ...draft };
   let ocupado = false, confirmando = null, aoDescartar = null;
   let ultimoFoco = null;                         // seletor do botão que abriu a janela (para devolver o foco ao fechar)
+  const comp = criarComposicao($, () => draft, () => estado());   // campos de valor, comissão e repasse
+  const mun = criarMunicipios({ $, obter: () => draft, regioes: () => regioes, porIbge: () => porIbge, ocupadas: () => ocupadas, msg: t => msg(t), aoMudar: () => estado() });
 
   const msg = t => { const m = $('#sv-msg'); if (m) m.textContent = t; };
   const txtErro = (e, padrao) => (e?.servidor ? e.message : padrao);
@@ -138,18 +146,6 @@ export function criarServico(ctx) {
       ...lista.map(e => h('option', { value: String(e.id), text: e.nome + (e.ativo ? '' : ' (inativa)') }))];
   }
 
-  // Preenche os campos da divisão a partir do rascunho. O campo que a pessoa está digitando (`origem`)
-  // não é reescrito, para o cursor não pular; os outros acompanham na hora.
-  const fmtPct = bp => (bp ? String(bp / 100).replace('.', ',') : '0');
-  function sincronizar(origem) {
-    const t = draft.centavos, liberado = t > 0, bp = bpPlat(draft);
-    const campos = { '#sv-pp': fmtPct(bp), '#sv-rp': fmtPct(10000 - bp), '#sv-pv': numBr(draft.plat), '#sv-rv': numBr(t - draft.plat) };
-    for (const [id, v] of Object.entries(campos)) {
-      const el = $(id); el.disabled = !liberado;
-      if (id !== origem) el.value = liberado ? v : '';
-    }
-  }
-
   function estado() {
     if (!ehForm()) return;
     const alt = sujo(), c = confirmando, regra = modo === 'regra';
@@ -158,7 +154,7 @@ export function criarServico(ctx) {
     $('#sv-sujo').hidden = !alt;
     $('#sv-excluir').hidden = regra ? selRegra == null : modo !== 'editar';
     $('#sv-st-t').textContent = draft.ativo ? (regra ? 'Ativa' : 'Ativo') : (regra ? 'Inativa' : 'Inativo');
-    if (!regra) $('#sv-cnt').textContent = `${draft.descricao.length}/500`;
+    if (!regra) $('#sv-cnt').textContent = `${draft.descricao.length}/${MAX_DESC}`;
     $('#sv-prev').replaceChildren(barra(draft.centavos, draft.plat));
     $('#sv-dica').textContent = draft.centavos > 0
       ? `Alterar qualquer campo recalcula os demais. Ao mudar o valor padrão, ${MANTEM[draft.modo]} é mantido.`
@@ -168,38 +164,6 @@ export function criarServico(ctx) {
       $('#sv-conf-t').textContent = c === 'excluir' ? (regra ? 'Excluir este preço por município?' : `Excluir ${draft.nome || 'este serviço'}?`) : 'Descartar as alterações?';
       $('#sv-sim').textContent = c === 'excluir' ? 'Excluir' : 'Descartar';
       $('#sv-nao').textContent = c === 'excluir' ? 'Cancelar' : 'Continuar editando';
-    }
-  }
-
-  // Leitura das máscaras ──────────────────────────────────────────────
-  // reais: só dígitos, preenchendo da direita para a esquerda (como app de banco): 1 2 0 5 0 → 120,50
-  function lerReais(el, max = 99999999) {
-    const dig = el.value.replace(/\D/g, '').slice(0, 8);   // até R$ 999.999,99
-    const v = Math.min(Number(dig || 0), max);
-    el.value = dig ? numBr(v) : ''; return v;
-  }
-  // percentual: dígitos e uma vírgula, até 2 casas, máximo 100 → devolve em centésimos de %
-  function lerPct(el) {
-    let v = el.value.replace('.', ',').replace(/[^\d,]/g, '');
-    const [i, ...r] = v.split(',');
-    v = i.slice(0, 3) + (r.length ? ',' + r.join('').slice(0, 2) : '');
-    if (Number(v.replace(',', '.')) > 100) v = '100';
-    el.value = v; return Math.round(Number(v.replace(',', '.') || 0) * 100);
-  }
-
-  // Divisão: qualquer campo recalcula os outros três (serviço e regra por município usam o mesmo bloco)
-  function ligarComposicao() {
-    $('#sv-val').oninput = ev => { draft.centavos = lerReais(ev.target); aplicarTotal(draft); sincronizar('#sv-val'); estado(); };
-    $('#sv-pp').oninput = ev => { definirPct(draft, lerPct(ev.target)); sincronizar('#sv-pp'); estado(); };
-    $('#sv-rp').oninput = ev => { definirPct(draft, 10000 - lerPct(ev.target)); sincronizar('#sv-rp'); estado(); };
-    $('#sv-pv').oninput = ev => { definirPlat(draft, lerReais(ev.target, draft.centavos)); sincronizar('#sv-pv'); estado(); };
-    $('#sv-rv').oninput = ev => { definirRep(draft, lerReais(ev.target, draft.centavos)); sincronizar('#sv-rv'); estado(); };
-    for (const id of ['#sv-val', '#sv-pp', '#sv-rp', '#sv-pv', '#sv-rv']) {
-      const el = $(id);
-      // ao entrar no campo, seleciona tudo: digitar substitui o valor (senão "0" + "15" viraria "015")
-      el.onfocus = () => setTimeout(() => { if (document.activeElement === el) el.select(); }, 0);
-      // ao sair, deixa tudo formatado igual (ex.: "15," vira "15"; vazio vira "0,00")
-      el.onblur = () => { $('#sv-val').value = draft.centavos ? numBr(draft.centavos) : ''; sincronizar(null); };
     }
   }
 
@@ -215,7 +179,7 @@ export function criarServico(ctx) {
     $('#sv-esp').replaceChildren(...opcoesEsp()); $('#sv-esp').value = draft.especialidade_id ? String(draft.especialidade_id) : '';
     $('#sv-nome').value = draft.nome; $('#sv-desc').value = draft.descricao; $('#sv-ativo').checked = draft.ativo;
     $('#sv-val').value = draft.centavos ? numBr(draft.centavos) : '';
-    sincronizar(null);
+    comp.sincronizar(null);
 
     $('#sv-esp').onchange = ev => { draft.especialidade_id = Number(ev.target.value) || null; estado(); };
     // nome: sempre em caixa alta, mantendo o cursor no lugar (e sem atrapalhar acentos em composição)
@@ -233,7 +197,8 @@ export function criarServico(ctx) {
     $('#sv-desc').oninput = ev => { draft.descricao = ev.target.value; estado(); };
     $('#sv-ativo').onchange = ev => { draft.ativo = ev.target.checked; estado(); };
 
-    ligarComposicao();
+    comp.ligar(); comp.ligarTempo();
+    criarTopicos($, () => draft, () => estado()).ligar();
 
     ligarBotoes();
 
@@ -242,67 +207,20 @@ export function criarServico(ctx) {
   }
 
   // ── Formulário da regra de preço por município ──
-  const rotuloCidade = r => `${r.cidade} (${r.uf})`;
   function ligarRegra(serv) {
     $('#sv-rnome').value = draft.nome; $('#sv-ativo').checked = draft.ativo;
     $('#sv-val').value = draft.centavos ? numBr(draft.centavos) : '';
     const padT = cent(serv.valor_padrao), padP = cent(serv.valor_plataforma);
     $('#sv-ref').hidden = false;
     $('#sv-ref').textContent = `Preço padrão do serviço: ${brl(padT)}, com comissão de ${brl(padP)} (${pct(bpDe(padT, padP))}).`;
-    $('#sv-bu').replaceChildren(h('option', { value: '', text: 'Todos os estados' }),
-      ...[...new Set(regioes.map(r => r.uf))].sort().map(u => h('option', { value: u, text: u })));
-    sincronizar(null);
+    comp.sincronizar(null);
 
     $('#sv-rnome').oninput = ev => { draft.nome = ev.target.value; estado(); };
     $('#sv-rnome').onkeydown = ev => { if (ev.key === 'Enter' && !$('#sv-salvar').disabled) salvarForm(); };
     $('#sv-ativo').onchange = ev => { draft.ativo = ev.target.checked; estado(); };
-    $('#sv-bq').oninput = $('#sv-bu').onchange = () => renderMunicipios();
-    $('#sv-nenhum').onclick = () => { draft.ibge_ids = []; renderMunicipios(); estado(); };
-    $('#sv-todos').onclick = () => {
-      const alvo = filtrarMunicipios().filter(r => !ocupadas.has(r.ibge_id)).map(r => r.ibge_id);
-      draft.ibge_ids = [...new Set([...draft.ibge_ids, ...alvo])].slice(0, MAX_MUNICIPIOS);
-      renderMunicipios(); estado();
-    };
-    ligarComposicao(); ligarBotoes();
-    renderMunicipios(); estado();
+    comp.ligar(); ligarBotoes();
+    mun.ligar(); estado();
     foco('#sv-rnome');
-  }
-
-  // municípios que aparecem na lista: cadastrados e ativos (mais os já escolhidos), conforme busca e estado
-  function filtrarMunicipios() {
-    const q = norm($('#sv-bq').value.trim()), u = $('#sv-bu').value, marcados = new Set(draft.ibge_ids);
-    return regioes.filter(r => (r.ativo || marcados.has(r.ibge_id)) && (!u || r.uf === u) && (!q || norm(r.cidade).includes(q)))
-      .sort((a, b) => a.cidade.localeCompare(b.cidade, 'pt') || a.uf.localeCompare(b.uf));
-  }
-  function alternarMunicipio(id, marcar) {
-    if (marcar && draft.ibge_ids.length >= MAX_MUNICIPIOS) { msg(`Máximo de ${MAX_MUNICIPIOS} municípios por regra.`); return false; }
-    draft.ibge_ids = marcar ? [...draft.ibge_ids, id] : draft.ibge_ids.filter(x => x !== id);
-    msg(''); renderSelecionados(); estado(); return true;
-  }
-  function renderSelecionados() {
-    const n = draft.ibge_ids.length;
-    $('#sv-nm').textContent = n ? `${n} selecionado${n > 1 ? 's' : ''}` : '';
-    $('#sv-chips').replaceChildren(...(n
-      ? [...draft.ibge_ids].map(id => porIbge.get(id) ?? { ibge_id: id, cidade: `código ${id}`, uf: '' })
-          .sort((a, b) => a.cidade.localeCompare(b.cidade, 'pt'))
-          .map(r => h('span', { class: 'sv-ch' }, r.uf ? rotuloCidade(r) : r.cidade,
-            h('button', { type: 'button', title: 'Remover', 'aria-label': 'Remover ' + r.cidade, onclick: () => { alternarMunicipio(r.ibge_id, false); renderMunicipios(); } }, icone('x'))))
-      : [h('span', { class: 'sv-ch-vazio', text: 'Nenhum município selecionado.' })]));
-  }
-  function renderMunicipios() {
-    renderSelecionados();
-    const lista = filtrarMunicipios(), MAXV = 300, marcados = new Set(draft.ibge_ids);
-    const livres = lista.filter(r => !ocupadas.has(r.ibge_id));
-    $('#sv-todos').textContent = livres.length ? `Selecionar ${livres.length === lista.length ? 'todos' : 'os livres'} (${Math.min(livres.length, MAXV)})` : '';
-    $('#sv-todos').hidden = !livres.length;
-    $('#sv-mun').replaceChildren(...(lista.length
-      ? [...lista.slice(0, MAXV).map(r => {
-          const bloq = ocupadas.has(r.ibge_id), cb = h('input', { type: 'checkbox', checked: marcados.has(r.ibge_id), disabled: bloq });
-          cb.onchange = () => { if (!alternarMunicipio(r.ibge_id, cb.checked)) cb.checked = false; };
-          return h('li', {}, h('label', { class: bloq ? 'bloq' : '' }, cb,
-            h('span', { class: 'mn-n', text: r.cidade }), h('small', { text: bloq ? `em “${ocupadas.get(r.ibge_id)}”` : r.uf })));
-        }), ...(lista.length > MAXV ? [h('li', { class: 'mais', text: `Mostrando ${MAXV} de ${lista.length}. Refine a busca.` })] : [])]
-      : [h('li', { class: 'mais', text: regioes.length ? 'Nenhum município encontrado.' : 'Nenhum município cadastrado. Cadastre em Regiões.' })]));
   }
 
   async function salvarForm() {

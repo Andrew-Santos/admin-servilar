@@ -1,0 +1,72 @@
+/* modules/cupons/style-cupom.css — janela do cupom (ver, cadastrar, editar) e campos do formulário. Importado pelo style.css. */
+
+.cp-ov{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(10,30,28,.45)}
+.cp-dlg{width:min(560px,100%);max-height:100%;display:flex;flex-direction:column;background:#fff;border-radius:var(--radius-lg);box-shadow:0 24px 60px rgba(10,30,28,.3);outline:none;animation:cp-in .16s ease-out}
+@keyframes cp-in{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.cp-dlg{animation:none}}
+.cp-dh{flex:none;display:flex;align-items:center;gap:12px;padding:18px 14px 16px 24px;border-bottom:1px solid var(--border)}
+.cp-dh h3{min-width:0;font-family:var(--font-title);font-size:17px;font-weight:600;line-height:1.3;letter-spacing:.03em;overflow-wrap:anywhere}
+.cp-dh .cp-pill{flex:none}
+.cp-sujo{flex:none;font-size:11px;font-weight:500;color:#B85A1F}
+.cp-dacoes{flex:none;display:flex;gap:2px;margin-left:auto}
+.cp-ib{width:36px;height:36px;display:grid;place-items:center;font-size:18px;color:var(--text-2);background:none;border:none;border-radius:8px;cursor:pointer;transition:background .12s}
+.cp-ib:hover{color:var(--teal-dark);background:var(--teal-soft)}
+.cp-db{flex:1;min-height:0;overflow:auto;padding:22px 24px 26px}
+.cp-df{flex:none;display:flex;flex-direction:column;gap:8px;padding:14px 24px;border-top:1px solid var(--border);background:var(--bg);border-radius:0 0 var(--radius-lg) var(--radius-lg)}
+.cp-acoes{display:flex;align-items:center;gap:8px}
+.cp-esp{flex:1}
+.cp-acoes .btn-borda,.cp-conf .btn-borda{height:36px}
+#cp-msg{font-size:12px;line-height:1.4;color:var(--text-2)}
+#cp-msg:empty{display:none}
+.cp-ex{height:36px;padding:0 4px;font-size:13px;font-weight:500;color:var(--text-2);background:none;border:none;cursor:pointer;text-decoration:underline}
+.cp-ex:hover{color:var(--teal-dark)}
+.cp-salvar,.cp-sim{height:36px;padding:0 20px;font-size:13px;font-weight:600;color:#fff;background:var(--teal-dark);border:none;border-radius:var(--radius);cursor:pointer;transition:background .12s}
+.cp-salvar:hover:not(:disabled),.cp-sim:hover{background:var(--teal)}
+.cp-salvar:disabled,#cp-cancelar:disabled{opacity:.45;cursor:default}
+.cp-conf{display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:13px;background:var(--teal-soft);border-radius:var(--radius)}
+.cp-conf span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* visualização */
+.cp-info + .cp-info{margin-top:24px}
+.cp-info h4{margin-bottom:8px;font-size:13px;font-weight:600;color:var(--text-1)}
+.cp-txt{font-size:14px;line-height:1.6;white-space:pre-wrap;color:var(--text-1)}
+.cp-txt.mudo{color:var(--text-3)}
+.cp-grande{font-family:var(--font-title);font-size:26px;font-weight:700;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.cp-barra{height:8px;margin-top:10px;overflow:hidden;background:var(--border);border-radius:4px}
+.cp-barra span{display:block;height:100%;background:var(--teal)}
+
+/* formulário */
+.cp-fg{margin-bottom:16px}
+.cp-fg:last-child{margin-bottom:0}
+.cp-dois{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cp-linha{display:flex;align-items:center;justify-content:space-between}
+.cp-lbl{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:6px;font-size:12px;font-weight:600;color:var(--text-2)}
+.cp-linha .cp-lbl{margin:0}
+.cp-lbl small{font-weight:400;color:var(--text-3)}
+.cp-campo{width:100%;height:38px;padding:0 12px;font:inherit;font-size:13px;color:var(--text-1);background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);transition:border-color .12s,box-shadow .12s}
+.cp-campo:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(47,156,149,.15)}
+.cp-campo:disabled{color:var(--text-3);background:var(--bg)}
+.cp-campo.cp-up{font-weight:600;letter-spacing:.03em}
+.cp-campo.cp-up::placeholder{font-weight:400}
+.cp-campo.num{text-align:right;font-variant-numeric:tabular-nums}
+textarea.cp-campo{height:auto;min-height:72px;max-height:160px;padding:9px 12px;line-height:1.5;resize:vertical}
+.cp-ad{position:relative}
+.cp-ad span{position:absolute;top:0;left:12px;height:38px;display:flex;align-items:center;font-size:13px;color:var(--text-3);pointer-events:none}
+.cp-ad .cp-campo{padding-left:36px}
+.cp-ad.pct span{left:auto;right:12px}
+.cp-ad.pct .cp-campo{padding-left:12px;padding-right:32px}
+.cp-dica{margin-top:6px;font-size:12px;color:var(--text-3)}
+.cp-ck{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:var(--text-2);cursor:pointer}
+.cp-sw{position:relative;display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--text-2);cursor:pointer}
+.cp-sw input{position:absolute;width:1px;height:1px;opacity:0}
+.cp-trilho{position:relative;width:36px;height:20px;background:var(--border);border-radius:10px;transition:background .15s}
+.cp-trilho::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:transform .15s}
+.cp-sw input:checked + .cp-trilho{background:var(--teal)}
+.cp-sw input:checked + .cp-trilho::after{transform:translateX(16px)}
+.cp-sw input:focus-visible + .cp-trilho{outline:2px solid var(--teal);outline-offset:2px}
+
+@media (max-width:600px){
+  .cp-ov{align-items:flex-end;padding:0}
+  .cp-dlg{width:100%;max-height:92dvh;border-radius:16px 16px 0 0}
+  .cp-dois{grid-template-columns:1fr}
+}
