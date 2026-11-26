@@ -1,0 +1,22 @@
+/* modules/pedidos/style-tabela.css — tabela de pedidos */
+.pd-tabela-caixa{flex:1;min-height:0;overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+.pd-tabela{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.pd-tabela th{position:sticky;top:0;z-index:1;padding:0 16px;height:42px;text-align:left;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);background:#FAFBFB;border-bottom:1px solid var(--border);white-space:nowrap}
+.pd-tabela td{padding:11px 16px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap}
+.pd-linha-tab{cursor:pointer}
+.pd-linha-tab:hover{background:rgba(47,156,149,.06)}
+.pd-linha-tab:last-child td{border-bottom:none}
+.pd-nome-btn{padding:0;font:inherit;font-weight:600;text-align:left;color:var(--text-1);background:none;border:none;cursor:pointer}
+.pd-mudo{color:var(--text-2)}
+.pd-nada{color:var(--text-3)}
+.pd-num{text-align:right}
+.pd-tabela th:nth-child(n+5):nth-child(-n+7){text-align:right}
+.pd-desc{color:#A4501A}
+.pd-total{font-weight:600}
+.pd-vazio-tab{padding:40px 16px;text-align:center;color:var(--text-3);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+
+/* telas pequenas: ficam só pedido, cliente e status */
+@media (max-width:700px){
+  .pd-tabela th:nth-child(n+4),.pd-tabela td:nth-child(n+4){display:none}
+  .pd-tabela th,.pd-tabela td{padding-left:12px;padding-right:12px}
+}

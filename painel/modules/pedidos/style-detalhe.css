@@ -1,0 +1,51 @@
+/* modules/pedidos/style-detalhe.css — conteúdo do pedido dentro da janela */
+.pd-grade{display:grid;grid-template-columns:minmax(200px,250px) minmax(0,1fr);gap:20px;align-items:start}
+.pd-lado{position:sticky;top:0;display:grid;gap:14px;justify-items:start}
+.pd-secoes{display:grid;gap:14px;min-width:0}
+@container (max-width:700px){
+  .pd-grade{grid-template-columns:minmax(0,1fr)}
+  .pd-lado{position:static}
+}
+.pd-numero{display:grid;gap:2px}
+.pd-numero small{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3)}
+.pd-numero strong{font-family:var(--font-title);font-size:26px;font-weight:700;color:var(--teal-dark)}
+.pd-resumo{display:grid;gap:10px;width:100%}
+
+.pd-secao{padding:16px;border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface)}
+.pd-secao>header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.pd-secao>header i{font-size:18px;color:var(--teal-dark)}
+.pd-secao>header h3{flex:1;min-width:0;font-family:var(--font-title);font-size:14px;font-weight:600}
+.pd-dados{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px 18px}
+.pd-dado dt{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3)}
+.pd-dado dd{margin-top:2px;overflow-wrap:anywhere}
+.pd-link{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:13px;font-weight:600;color:var(--teal-dark)}
+
+/* alterar status */
+.pd-status-linha{display:flex;gap:10px;flex-wrap:wrap}
+.pd-status-linha .pd-campo{flex:1;min-width:180px;width:auto}
+.pd-aviso:empty{display:none}
+
+/* itens */
+.pd-itens-caixa{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius)}
+.pd-itens{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+.pd-itens th{padding:8px 12px;text-align:left;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);background:#FAFBFB;border-bottom:1px solid var(--border);white-space:nowrap}
+.pd-itens th:nth-child(n+2){text-align:right}
+.pd-itens td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.pd-itens td:nth-child(n+2){white-space:nowrap}
+.pd-itens tr:last-child td{border-bottom:none}
+
+/* resumo financeiro */
+.pd-financeiro{display:grid;gap:8px;max-width:420px}
+.pd-financeiro hr{width:100%;border:none;border-top:1px solid var(--border)}
+.pd-fin{display:flex;justify-content:space-between;gap:12px}
+.pd-fin b{font-weight:600;font-variant-numeric:tabular-nums}
+.pd-fin.mudo{font-size:12px;color:var(--text-2)}
+.pd-fin.desc b{color:#A4501A}
+.pd-fin.total{font-size:15px}
+.pd-fin.total b{color:var(--teal-dark)}
+
+/* endereço */
+.pd-end{padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius)}
+.pd-end>header{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pd-end>header strong{font-weight:600}
+.pd-end-resumo{margin:6px 0 12px;font-size:12px;color:var(--text-2)}

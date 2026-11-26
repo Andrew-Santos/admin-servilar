@@ -1,0 +1,20 @@
+/* modules/pedidos/style-janela.css — janela redimensionável */
+.pd-janela{position:fixed;inset:auto;margin:0;padding:0;display:none;flex-direction:column;overflow:hidden;resize:both;
+  min-width:min(520px,100vw);min-height:340px;max-width:100vw;max-height:100dvh;container-type:inline-size;
+  color:var(--text-1);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:0 24px 70px rgba(10,30,28,.35)}
+.pd-janela[open]{display:flex}
+.pd-janela::backdrop{background:rgba(10,30,28,.5)}
+.pd-janela.max{left:0!important;top:0!important;width:100vw!important;height:100dvh!important;border-radius:0;resize:none}
+.pd-jan-cab{flex:none;display:flex;align-items:center;gap:10px;padding:10px 12px 10px 20px;border-bottom:1px solid var(--border);background:#FAFBFB;cursor:move;user-select:none;touch-action:none}
+.pd-jan-tit{font-family:var(--font-title);font-size:16px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pd-jan-extra{flex:1;min-width:0}
+.pd-jan-btn{color:var(--text-2)}
+.pd-jan-btn:hover{background:var(--teal-soft)}
+.pd-jan-corpo{flex:1;min-height:0;overflow:auto;padding:20px}
+
+/* celular: janela em tela cheia, sem arrastar nem redimensionar */
+@media (max-width:700px){
+  .pd-janela{left:0!important;top:0!important;width:100vw!important;height:100dvh!important;min-width:0;border-radius:0;resize:none}
+  .pd-jan-cab{cursor:default}
+  .pd-jan-corpo{padding:14px}
+}

@@ -10,8 +10,10 @@ export const MENU = [
     { id: 'profissionais',  titulo: 'Profissionais',     icone: 'hard-hat' },
   ]},
   { grupo: 'Atendimento', itens: [
+    { id: 'pedidos',        titulo: 'Pedidos',           icone: 'shopping-bag' },    // pedidos do atendimento: consulta, itens e troca de status
     { id: 'clientes',       titulo: 'Clientes',          icone: 'users' },          // só consulta: o cliente nasce no atendimento pelo WhatsApp
     { id: 'whatsapp',       titulo: 'WhatsApp',          icone: 'whatsapp-logo' },   // histórico de mensagens recebidas e enviadas
+    { id: 'treinar-ia',     titulo: 'Treinar IA',        icone: 'brain' },           // chat de treino + tabelas que ensinam o Seu Serverino
   ]},
 ];
 
